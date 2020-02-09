@@ -9,3 +9,7 @@ __Voraussetzungen:__
 - gstreamer
 
 Anleitung -> [myRadio UbuntuUsers Wiki 🇩🇪](https://wiki.ubuntuusers.de/Howto/myRadio/)
+
+__Installation Mint / Ubuntu__
+
+`wget 'https://raw.githubusercontent.com/Axel-Erfurt/InternetRadioDeutsch/master/InternetRadioDeutschInstallation.sh' -O ~/Downloads/InternetRadioDeutschInstallation.sh && chmod +x ~/Downloads/InternetRadioDeutschInstallation.sh && ~/Downloads/InternetRadioDeutschInstallation.sh `
