@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=myRadio Deutsch
+Comment=Tray Radio Player
+Exec=sh -c "python3 ~/.local/share/InternetRadioDeutsch/myRadioD.py"
+Icon=~/.local/share/InternetRadioDeutsch/radio_bg.png
+Categories:Audio;AudioVideo;Player
+Path=
+Terminal=false
+StartupNotify=true

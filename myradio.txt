@@ -1,0 +1,140 @@
+-- Information --
+MDR Aktuell,http://mdr-284340-0.cast.mdr.de/mdr/284340/0/mp3/low/stream.mp3
+Deutschlandfunk Nachrichten,http://ondemand-mp3.dradio.de/file/dradio/nachrichten/nachrichten.mp3
+-- Country --
+WJVC "My Country 96.1" Center Moriches  NY,http://provisioning.streamtheworld.com/pls/WJVCFMAAC.pls
+WBBC 93.5 "Bobcat Country Radio" Blackstone  VA,http://crystalout.surfernetwork.com:8001/WBBC_MP3
+Johnny Cash Radio,http://streaming.radio.co/s9fa0dff72/listen
+Nashville FM,http://server-14.stream-server.nl:8300
+Absolute Country Hits,http://sc-acountry.1.fm:7800
+Classic Country Radio,http://strm112.1.fm/ccountry_mobile_mp3
+Classic Country Music,http://184.164.135.70:8133/;
+Holland Country Radio,http://178.20.171.115:80
+Nashville FM,http://server-14.stream-server.nl:8300/;
+AFN Country,http://18813.live.streamtheworld.com:80/AFN_CTYAAC_SC
+Country 108,http://icepool.silvacast.com/COUNTRY108.mp3
+Todays Country,http://listen.011fm.com:80/stream09
+Kickin Country,http://113fm-edge2.cdnstream.com:80/1715_128
+-- Bluegrass --
+Bluegrass,http://199.180.72.2:8607/
+Abiding Radio Bluegrass Hymns,http://streams.abidingradio.org:7840/1
+WAMU's Bluegrass Country,http://ice24.securenetsystems.net/WAMU2
+-- Folk --
+WNIS "News Talk 790" Norfolk  VA,http://provisioning.streamtheworld.com/pls/WNISAMAAC.pls
+Bob Dylan,http://listen.57fm.com/stream/3/
+European Hit Radio - Acoustic,http://stream.europeanhitradio.com:8000/Stream_18.aac
+Hit Radio FFH - Acoustic Hits,http://streams.ffh.de/ffhchannels/aac/acoustichits.aac
+Acoustic Output,http://listen.57fm.com/acop
+Folk Rock,http://79.111.14.76:9097/
+RPR1 Acoustic,http://streams.rpr1.de/rpr-acoustic-128-mp3
+Acoustic FM,http://listen.radionomy.com/acoustic-fm
+WUMB Contemporary Folk Stream - Boston  MA,http://wumb.streamguys1.com/wumb919cf-aac
+-- Lokal --
+Welle Nord,http://www.ndr.de/resources/metadaten/audio/m3u/ndr1wellenord_ki.m3u
+Antenne Thüringen,http://stream.antennethueringen.de/live/mp3-128/
+Landeswelle Thüringen,http://stream.landeswelle.de/lwt/mp3-128/web/stream.mp3
+Radio F.R.E.I.,http://streaming.fueralle.org:8000/Radio-F.R.E.I
+Landeswelle Thüringen - Schlagerwelle,http://stream.landeswelle.de/lwsw/mp3-192
+-- Swing --
+Swing FM,http://swingfm.ice.infomaniak.ch/swingfm-128.mp3
+Crooner radio To Sinatra,http://stream.crooner.fr/crooner_sinatra
+Frank Sinatra Radio,http://94.23.159.187:9998/;stream/1
+-- 70er --
+R101 '70,http://icy.unitedradio.it/R10170.aac
+radio SAW - 70er,http://saw-de-hz-fal-stream09-cluster01.radiohost.de:80/saw-70er_128
+Rouge FM 70s,http://rouge-70s.ice.infomaniak.ch/rouge-70s-128.mp3
+San Francisco's 70's HITS!,http://198.178.123.17:10922/;
+-- 60er --
+- 1A 60er -,http://1a-60er.radionetz.de/1a-60er.aac
+-- Oldies --
+Swinging Radio England.UK,http://listen.radionomy.com/swingingradioengland3
+Flower Power Radio,http://50.7.129.122:8433/stream
+TBN - Oldies Rock N Roll,http://rosetta.shoutca.st:9431/stream
+TOP FM oldies,http://live.topfm.hu:8000/oldies.mp3
+WQBT "The Beat" 94.1 FM Savannah  GA,https://c5.prod.playlists.ihrhls.com/805/playlist.m3u8
+The Beat,http://stream.thebeat.no/beat128.mp3
+Exclusively Beatles,http://stream.radiojar.com/kykfyu1bexquv
+181.FM - Beatles,http://www.181.fm/stream/pls/181-beatles.pls
+Rock Max - Oldies,http://212.111.2.151:8000/rm_old_176.ogg
+Antenne TH. YESTERHITS,https://stream.antennethueringen.de/yesterhits/mp3-192/
+Radio Eisenherz,http://1a-60er.radionetz.de/1a-60er.mp3
+Antenne Bayern Oldies,http://mp3channels.webradio.antenne.de/oldies-but-goldies
+R.SA Oldie-Club,http://streams.rsa-sachsen.de/rsa-oldies/mp3-192/mediaplayerrsa
+60er Radio,http://1a-60er.radionetz.de/1a-60er.mp3
+70er Radio,http://1a-70er.radionetz.de:8000/1a-70er.mp3
+Non Stop 60s,http://listen.011fm.com:8004/stream03
+Landeswelle Thr Oldies,http://stream.landeswelle.de/lwol/mp3-192/web
+British Sixties Radio,http://streaming.radionomy.com/JamendoLounge
+RTL 60er & 70er,http://rtlberlin.hoerradar.de/rtlberlin-60er70er-mp3-128?sABC=5q1o0q1n%230%23o000r827s931po57p4q48q3377r73615%23enqvb-oebjfre.vasb&amsparams=playerid:radio-browser.info;skey:1562053914
+Vintage Radio,https://vintageradio.ice.infomaniak.ch/vintageradio-high.mp3
+57 Chevy Logs Songs,http://listen.57fm.com/fgrock
+SomaFM: Left Coast 70s,http://ice1.somafm.com/seventies-128-mp3
+Always Elvis Radio,http://netradio.radioalfa.dk/alwayselvisradio
+-- Classic Rock --
+Zenith Classic Rock [MP3],http://148.163.81.10:8006/listen.pls
+Led Zeppelin,http://stream3.polskieradio.pl:8068
+Antenne Thr Rock,https://stream.antennethueringen.de/rock/mp3-192/web/
+R.SA Rockzirkus,http://streams.rsa-sachsen.de/rsa-rockzirkus/mp3-192/mediaplayerrsa
+Radio21 – Classic-Rock,http://188.94.97.91/radio21.mp3
+NDR 2 Soundcheck Milestones,http://ndr-loop-16.cast.addradio.de/ndr/loop/16/mp3/128/stream.mp3
+Classic Rock Radio,https://internetradio.salue.de:8443/classicrock.mp3
+Queen Radio,http://ic7.101.ru:8000/a54
+Deep Purple Radio,http://ic7.101.ru:8000/a125
+Rolling Stones Radio,http://icy.unitedradio.it/VirginSpecialEvent.mp3
+AC/DC Radio Blob,http://streams.radiobob.de/bob-acdc/mp3-128/streams.radiobob.de/
+Radio Bob Classic Rock,http://streams.radiobob.de/bob-classicrock/mp3-128/streams.radiobob.de/
+Radio Bob Kuschel Rock,http://streams.radiobob.de/bob-kuschelrock/mp3-128/streams.radiobob.de/
+MDR SPUTNIK Rock-Channel,http://mdr-284331-1.cast.mdr.de/mdr/284331/1/mp3/high/stream.mp3
+MDR JUMP Rock-Channel,http://mdr-284321-1.cast.mdr.de/mdr/284321/1/mp3/high/stream.mp3
+Radio Hamlar,http://radiohamlar.stream.laut.fm/radiohamlar?pl=m3u&t302=2018-08-27_17-40-49&uuid=79e0126a-6db8-42a9-9d1c-a164ecdbd514
+-- Metal --
+Metal Hammer,http://metal-hammer.stream.laut.fm/metal-hammer?pl=m3u&t302=2018-08-27_17-45-30&uuid=c6d9b72b-2366-4673-ba50-d070daca09d4
+-- Alternativ --
+Chante France 60's,http://stream.chantefrance.com/cf-60
+FREI,http://streaming.fueralle.org:8000/Radio-F.R.E.I
+Rust Radio,http://rustradio.org:8000
+Das Radio der von Neil Young Getöteten,http://streamplus3.leonex.de:11216/
+DDR Radio,http://ddr-radio.stream.laut.fm/ddr-radio
+R.SA Ostrock Stream,http://streams.rsa-sachsen.de/rsa-ostrock/mp3-192/mediaplayerrsa
+R.SA Beatles Stream,http://streams.rsa-sachsen.de/rsa-beatles/mp3-192/mediaplayerrsa
+-- Unplugged --
+delta radio - Unplugged,http://streams.deltaradio.de/delta-unplugged/mp3-192
+Radio Bob! chillout-unplugged,http://streams.radiobob.de/bob-chillout/mp3-192/
+Radio Regenbogen - Unplugged,http://streams.regenbogen.de/rr-unplugged-128-mp3
+delta radio - Unplugged,http://streams.deltaradio.de/delta-unplugged/mp3-192
+Hit Radio FFH - Acoustic Hits,http://streams.ffh.de/ffhchannels/mp3/acoustichits.mp3
+-- Acoustic --
+Hit Radio FFH - Acoustic Hits,http://streams.ffh.de/ffhchannels/mp3/acoustichits.mp3
+Acoustic FM,http://listen.radionomy.com/acoustic-fm
+-- Folk Rock --
+Radio Caprice - Folk Rock,http://79.111.14.76:8002/folkrock
+-- Test --
+WAMU's Bluegrass Country - Washington  DC,http://ice24.securenetsystems.net/WAMU2
+-- SoftRock --
+Virgin Radio Rock Ballads,http://icy.unitedradio.it/Virgin_06.mp3
+1.FM - America's Best Ballads Radio,http://strm112.1.fm/onelive_mobile_mp3
+-- Blues --
+Radio Iglesias Blues,http://onair15.xdevel.com:8022/listen.pls
+Radio Caprice - Harmonica Blues,http://79.120.39.202:9081/
+WGLT Blues Channel - Normal  IL,http://wgltradio.ilstu.edu:8000/wgltblues.mp3
+The Blues Cove,http://217.116.9.142:9090/TheBluesCove
+Strictly Blues,http://c1icyelb.prod.playlists.ihrhls.com/6936_icy
+Classic 21 Blues,https://radios.rtbf.be/wr-c21-blues-128.mp3
+Blues Music Fan Radio,http://ais-sa2.cdnstream1.com/1992_128.mp3
+-- Schlager --
+SchlagerPlanet - 100% Roland Kaiser,http://streams.schlagerplanetradio.com/kaiser/mp3-192
+Ü30-Partyradio Schlager,http://stream.ue30partyradio.de:18000/;
+MDR Schlagerwelt Thüringen,http://avw.mdr.de/streams/990601-0_mp3_high.m3u
+-- Disco --
+RMF 70s Disco,http://31.192.216.5/70SDISCO
+-- Hits --
+Virgin Radio Rock Hits,http://icy.unitedradio.it/VirginRockHits.mp3
+WNOX 93.1 "Classic Hits" Karns  TN,http://provisioning.streamtheworld.com/pls/WNOXFMAAC.pls
+Virgin Radio Rock Hits,http://icy.unitedradio.it/VirginRockHits.mp3
+WKPW 90.7 "Classic Hits" Knightstown  IN,http://165.139.147.234:8081/wkpw
+WDBG Big 103.1 Classic Hits & True Oldies,http://ice10.securenetsystems.net/WDBG
+WCSY "SuperHits 103.7 COSY-FM" South Haven  MI,http://crystalout.surfernetwork.com:8001/WCSY-FM_MP3
+-- Rock --
+WNRQ "105.9 The Rock" Nashville  TN,http://c6icy.prod.playlists.ihrhls.com/2780_icy
+WXTB 97.9 "98 Rock" Clearwater  FL,http://c4icyelb.prod.playlists.ihrhls.com/697_icy
+
