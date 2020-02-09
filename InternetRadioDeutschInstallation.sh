@@ -21,7 +21,7 @@ then
     echo "$desktopfile already exists"
 else
     echo "$desktopfile not found"
-    cp $HOME/.local/share/InternetRadio/InternetRadioDeutsch.desktop $HOME/.local/share/applications
+    cp $HOME/.local/share/InternetRadioDeutsch/InternetRadioDeutsch.desktop $HOME/.local/share/applications
 fi
 echo "removing InternetRadioDeutsch"
 rm -rf ~/.local/share/InternetRadioDeutsch
