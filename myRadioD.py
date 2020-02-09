@@ -59,7 +59,7 @@ class Editor(QWidget):
 class MainWin(QMainWindow):
     def __init__(self):
         super(MainWin, self).__init__()
-        self.settings = QSettings("myRadio", "settings")
+        self.settings = QSettings("myRadioDeutsch", "settings")
         self.setStyleSheet(mystylesheet(self))
         self.radioNames = []
         self.radiolist = []
