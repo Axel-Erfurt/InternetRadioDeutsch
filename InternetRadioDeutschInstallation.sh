@@ -40,7 +40,7 @@ then
     echo "restore myradio.txt"
     cp $rf $HOME/.local/share/InternetRadioDeutsch
 else
-    echo "$filename not found"
+    echo "$rf not found"
 fi
 #cp ~/.local/share/InternetRadioDeutsch/InternetRadioDeutsch.desktop ~/.local/share/applications
 rm ~/Downloads/InternetRadioDeutschInstallation.sh
