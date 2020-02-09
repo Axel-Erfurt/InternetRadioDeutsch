@@ -383,9 +383,11 @@ class MainWin(QMainWindow):
         if self.settings.contains("notifications"):
             self.notificationsEnabled = self.settings.value("notifications")
             if self.settings.value("notifications") == "false":
+                self.notificationsEnabled = False
                 self.notifAction.setText("Tray Meldungen einschalten")
             else:
-                self.notifAction.setText("Tray Meldungen ausschalten")    
+                self.notifAction.setText("Tray Meldungen ausschalten")
+                self.notificationsEnabled = True
         if self.settings.contains("windowstate"):
             print(self.settings.value("windowstate"))
             if self.settings.value("windowstate") == "Hauptfenster anzeigen":
@@ -843,3 +845,4 @@ if __name__ == "__main__":
     app.setQuitOnLastWindowClosed(False)
     #win.show()
     sys.exit(app.exec_())
+    
