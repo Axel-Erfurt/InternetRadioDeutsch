@@ -15,14 +15,6 @@ else
     echo "$sharedapps not found"
     mkdir $sharedapps
 fi
-desktopfile=$HOME/.local/share/applications/InternetRadioDeutsch.desktop
-if [ -e "$desktopfile" ]
-then
-    echo "$desktopfile already exists"
-else
-    echo "$desktopfile not found"
-    cp $HOME/.local/share/InternetRadioDeutsch/InternetRadioDeutsch.desktop $HOME/.local/share/applications
-fi
 echo "removing InternetRadioDeutsch"
 rm -rf ~/.local/share/InternetRadioDeutsch
 cd ~/.local/share/
@@ -34,6 +26,14 @@ sleep 1
 echo "remove zip file"
 rm master.zip
 mv ~/.local/share/InternetRadioDeutsch-master ~/.local/share/InternetRadioDeutsch
+desktopfile=$HOME/.local/share/applications/InternetRadioDeutsch.desktop
+if [ -e "$desktopfile" ]
+then
+    echo "$desktopfile already exists"
+else
+    echo "$desktopfile not found"
+    cp $HOME/.local/share/InternetRadioDeutsch/InternetRadioDeutsch.desktop $HOME/.local/share/applications
+fi
 rf=/tmp/myradio.txt
 if [ -e "$rf" ]
 then
