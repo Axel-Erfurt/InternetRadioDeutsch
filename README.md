@@ -13,3 +13,7 @@ Anleitung -> [myRadio UbuntuUsers Wiki 🇩🇪](https://wiki.ubuntuusers.de/How
 __Installation Mint / Ubuntu__
 
 `wget 'https://raw.githubusercontent.com/Axel-Erfurt/InternetRadioDeutsch/master/InternetRadioDeutschInstallation.sh' -O ~/Downloads/InternetRadioDeutschInstallation.sh && chmod +x ~/Downloads/InternetRadioDeutschInstallation.sh && ~/Downloads/InternetRadioDeutschInstallation.sh `
+
+__Deinstallation Mint / Ubuntu__
+
+`rm -rf ~/.local/share/applications/InternetRadioDeutsch.desktop && rm -rf ~/.local/share/InternetRadioDeutsch`
