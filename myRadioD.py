@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QSlider, QStatu
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem, QVideoWidget
 from PyQt5.QtGui import QIcon, QPixmap, QPalette, QCursor, QStandardItem
-from PyQt5.Qt import QDesktopServices
+#from PyQt5.Qt import QDesktopServices
 import RadioFinderD as RadioFinder
 
 changed = pyqtSignal(QMimeData)
@@ -415,11 +415,9 @@ class MainWin(QMainWindow):
         self.channels = []
         dir = os.path.dirname(sys.argv[0])
         self.radiofile = os.path.join(dir, "myradio.txt")
-        #import codecs
         with open(self.radiofile, 'r') as f:
             self.radioStations = f.read()
             f.close()
-            #self.radioStations = self.remove_last_line_from_string(self.radioStations)
             for t in self.radioStations:
                 self.channels.append(t)
             for lines in self.radioStations.split("\n"):
@@ -430,7 +428,6 @@ class MainWin(QMainWindow):
                     m.setEnabled(False)
                     self.urlCombo.model().appendRow(m)            
                 self.radiolist.append(lines.partition(",")[2])
-        #self.urlCombo.setCurrentIndex(0)
 
     def edit_Channels(self):
         dir = os.path.dirname(sys.argv[0])
@@ -592,9 +589,10 @@ class MainWin(QMainWindow):
         self.msglbl.setText("%s %s" % ("spiele", self.urlCombo.currentText()))
         self.metaDataChanged()
         
-    def setVolumeWheel(self):
-        print("wheel")
-        self.level_sld.setValue(self.level_sld.value() + 5)
+    def wheelEvent(self, event):
+        super(MainWin, self).wheelEvent(event)
+        delta = int(event.angleDelta().y()) / 60
+        self.level_sld.setValue(self.level_sld.value() + delta)
 
  
     def set_running_player(self):
@@ -624,7 +622,7 @@ class MainWin(QMainWindow):
  
     def set_sound_level(self, level):
         self.player.set_sound_level(level)
-        self.level_lbl.setText("Volume " + str(level))
+        self.level_lbl.setText("Lautstärke " + str(level))
  
     def update_volume_slider(self, level):
         self.level_lbl.setText("Lautstärke " + str(level))
@@ -655,15 +653,11 @@ class MainWin(QMainWindow):
             print("stoppe Aufnahme")
             self.is_recording = False
             QProcess.execute("killall wget")
-            #if self.isVisible() ==False:
-            #    self.showWinAction.setText("Hauptfenster verbergen")
-            #    self.setVisible(True)
             self.saveMovie()
             self.stoprec_btn.setVisible(False)
             self.rec_btn.setVisible(True)
             self.recordAction.setText("%s %s: %s" % ("starte Aufnahme", "von", self.urlCombo.currentText()))
             self.recordAction.setIcon(QIcon.fromTheme("media-record"))
-            #self.showMain()
         else:
             self.trayIcon.showMessage("Note", "keine Aufnahme gastartet", self.tIcon, 2000)
 
