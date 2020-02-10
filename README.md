@@ -17,3 +17,7 @@ __Installation Mint / Ubuntu__
 __Deinstallation Mint / Ubuntu__
 
 `rm -rf ~/.local/share/applications/InternetRadioDeutsch.desktop && rm -rf ~/.local/share/InternetRadioDeutsch`
+
+[64bit App Version 🇩🇪](https://dl.dropbox.com/s/1nk20f6e31lzvav/myRadioD.tar.gz)
+
+entpacken und im entpackten Ordner ***myRadioD*** starten. Läuft ohne PyQt5 Installation.
