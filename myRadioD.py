@@ -503,6 +503,7 @@ class MainWin(QMainWindow):
                 print(mt)
                 if self.notificationsEnabled == True:
                     self.trayIcon.showMessage("myRadio", mt, self.tIcon, 2000)
+                    self.trayIcon.setToolTip(mt)
                 else:
                     self.trayIcon.setToolTip(mt)
         else:
