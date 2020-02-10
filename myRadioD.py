@@ -191,7 +191,7 @@ class MainWin(QMainWindow):
         self.editAction = QAction(QIcon.fromTheme("preferences-system"), "Senderliste bearbeiten", 
                                     triggered = self.edit_Channels)
         self.showWinAction = QAction(QIcon.fromTheme("view-restore"), "Hauptfenster anzeigen", triggered = self.showMain)
-        self.notifAction = QAction(QIcon.fromTheme("dialog-information"), "Tray Meldungen nicht anzeigen", triggered = self.toggleNotif)
+        self.notifAction = QAction(QIcon.fromTheme("dialog-information"), "Tray Meldungen ausschalten", triggered = self.toggleNotif)
         self.togglePlayerAction = QAction("Wiedergabe stoppen", triggered = self.togglePlay)
         self.togglePlayerAction.setIcon(QIcon.fromTheme("media-playback-stop"))
         self.recordAction = QAction(QIcon.fromTheme("media-record"), "Sender aufnehmen", triggered = self.recordRadio1)
