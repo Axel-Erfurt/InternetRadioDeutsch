@@ -40,10 +40,14 @@ then
     echo "restore myradio.txt"
     cp $rf $HOME/.local/share/InternetRadioDeutsch
 else
-    echo "$rf not found"
+    echo "$filename not found"
 fi
-#cp ~/.local/share/InternetRadioDeutsch/InternetRadioDeutsch.desktop ~/.local/share/applications
 rm ~/Downloads/InternetRadioDeutschInstallation.sh
+cd ~/.local/share/applications/
+mv InternetRadioDeutsch.desktop InternetRadioDeutsch.desktop-bak
+icon=$(echo ~)/.local/share/InternetRadioDeutsch/radio_bg.png
+sed -e "s,Icon=.*,Icon=$icon,g" InternetRadioDeutsch.desktop-bak > InternetRadioDeutsch.desktop
+rm InternetRadioDeutsch.desktop-bak
 echo "starting InternetRadio ... please use tray icon context menu with right mouse button"
 python3 ~/.local/share/InternetRadioDeutsch/myRadioD.py
 exit
