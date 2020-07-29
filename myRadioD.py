@@ -65,6 +65,7 @@ class MainWin(QMainWindow):
         self.radioStations = ""
         self.rec_name = ""
         self.rec_url = ""
+        self.old_meta = ""
         self.notificationsEnabled = True
         self.wg = QWidget()
         self.fr = RadioFinder()
@@ -525,12 +526,15 @@ class MainWin(QMainWindow):
             if description == None and comment == None:
                 mt = (f"{new_trackInfo}")
             if not mt == "None":
-                print(mt)
                 if self.notificationsEnabled == True:
-                    self.trayIcon.showMessage("myRadio", mt, self.tIcon, 2000)
+                    if not mt == self.old_meta:
+                        print(mt)
+                        self.trayIcon.showMessage("myRadio", mt, self.tIcon, 2000)
+                        self.old_meta = mt
                     self.trayIcon.setToolTip(mt)
                 else:
                     self.trayIcon.setToolTip(mt)
+                    self.old_meta = mt
         else:
             self.msglbl.setText("%s %s" % ("spiele", self.urlCombo))
 
@@ -1050,6 +1054,7 @@ class RadioFinder(QMainWindow):
         self.addAction(self.helpAction)
         self.statusBar().showMessage("Welcome", 0)
         self.modified = False
+        self.old_meta = ''
         
         
     def addToRadiolist(self):
@@ -1179,10 +1184,15 @@ class RadioFinder(QMainWindow):
         if self.player.isMetaDataAvailable():
             trackInfo = (self.player.metaData("Title"))
             trackInfo2 = (self.player.metaData("Comment"))
+            my_metadata = f'{trackInfo}\n{trackInfo2}'
             if not trackInfo == None:
-                self.statusBar().showMessage(trackInfo, 0)
+                if not trackInfo == self.old_meta:
+                    self.statusBar().showMessage(trackInfo, 0)
+                    self.old_meta = trackInfo
                 if not trackInfo2 == None:
-                   self.statusBar().showMessage("%s %s" % (trackInfo, trackInfo2))
+                    if not self.old_meta == my_metadata:
+                        self.statusBar().showMessage(my_metadata)
+                        self.old_meta = my_metadata
 
     def getURLfromPLS(self, inURL):
         print("detecting", inURL)
@@ -1382,4 +1392,3 @@ if __name__ == "__main__":
     app.setQuitOnLastWindowClosed(False)
     #win.show()
     sys.exit(app.exec_())
-    
