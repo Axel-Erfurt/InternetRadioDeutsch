@@ -3,9 +3,10 @@
 import os
 import sys
 import requests
+import base64
 from subprocess import call
 from PyQt5.QtCore import (Qt, QUrl, pyqtSignal, Qt, QMimeData, QSize, QPoint, QProcess, 
-                            QStandardPaths, QFile, QDir, QSettings, QEvent)
+                            QStandardPaths, QFile, QDir, QSettings, QEvent, QByteArray)
 from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QSlider, QStatusBar, 
                             QMainWindow, QFileDialog, QListView, QMenu, qApp, QAction, QLineEdit, 
                              QVBoxLayout, QHBoxLayout, QComboBox, QLabel, QSpacerItem, QSizePolicy, 
@@ -31,7 +32,7 @@ class Editor(QWidget):
         self.setStyleSheet("QPlainTextEdit {background-color: #eeeeec;}")
 
     def closeEvent(self, event):
-        if self.isModified == True:
+        if self.isModified:
             quit_msg = "<b>Datei wurde verändert.<br>Speichern?</ b>\
                         <br><br><span style='color: #a40000;'>neue Sender sind beim nächsten Start von myRadio verfügbar</span>"
             reply = QMessageBox.question(None, 'Speichern', 
@@ -56,6 +57,10 @@ class Editor(QWidget):
 class MainWin(QMainWindow):
     def __init__(self):
         super(MainWin, self).__init__()
+        imgstring = b"iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAFG3pUWHRSYXcgcHJvZmlsZSB0eXBlIGV4aWYAAHjarVbpkSO9Df3PKBwCQRwkwwFJoMoZOHw/Sq3Zmf3W5fLRmpY0PAAQ72iV+Mffs/wNFwlZEe3DplnFJVNmc3wZ9X3d7wt3ez7vlNXPRXW+3l9XIfka/jHxGaf2c/xr3n8LJE92Wj8nPuNt/BaovT/4Jmi/Epb5TBBj+A+ZbY5e5df//hwtnwCKFX20Wri1YMFNTO9M/L4dd8d7Yyx7RhSrnIVv8ldAZO63fFT02nwXNgSiSZ+JpyrEeLr+bRzrcQB+NepzivL9GLX9mvjecBTz5/HPZTcQY5q/BbM/o/LvQCn/CpXXsb41Wdrzrf0c53wfuHyqyzwjM14rxMVATnvY9Tk8PetATeFn7utVfv7737/+g0Bftfyvgf4PFWXu2xK6Yr7Q40Zd7cLS6K5guoGw7E5+kOOvBv/pMgSbIKe/d7W3HEDb8trUXi/+LcB7RK6caqf2rglKEtKGep4Cxjtx+cv271d/hUENT/5J9CSoLxpfRvWHkN9s6j3xzk8Q021AI2nQISnZLcVahx6B37W8/RRx+8Tl5gA765kndzPNwaxr6urW0iR5+jnHqp9p2S36lCUIvbbRhj0MsqkzRxk8dO9gnfOsyLxKP2oyfNLYA06MP+sOjCY3mbwUKnSeJ5rHWOxH5fQovW+hQ0c9xQNpQxtvW0f6gOqPqewUYtxrIyqt2ZF0eXqf2NVsS/CJwthtY4xbS6tHWs+evHNm0Ox9bT+STYI0VvaOufTceyl43kldp2yX8CLk2KTnpvaVYse6njyTw525Gslubq0OcbJNqEajb8A4Bk6259rUJ0WZibzatq/ZNjKO6D58od/hSxwZz4zVHeuX9nMiraKVYjitA4F5LAPIlq1gGlrfPOs620G2nKIbe/ea63Ae4s1AjqXHbMmG9t5WuoZqM07Feamc4znOlrOGqi7bQEBsrwSEpnSCF0kEOkYVhz/o93GBohbASlfeaMseq7imdTxQzn2YoBTLecRn5444fTIdPGaATO8HzCGa01Sl2Vg2yQzvdSkewwV9NK3KU/X0atmoNw0Gl2ItdH2jA76coxNySEdnsNAodEZKyBZ0gDVK7I6GAnrhubOOoVzV9szVd5si0XSs6HxAcOA2wAGl9DbGdrW6rU48DjoXvgSyDsFUA/VTq+gVnnJ2vjaRABsxdZFe+qOWPZorMuwOMREQBo+0KNCBFhh6a2Tqh+H9fQEABD+GqatJnXzRuU9f6NAEJGyRw/CcRvq2GH60xmh9jbpgMU2u6+QNtMAXXhkgcBM4JLD0ACh2YkfsVbcPiODSrNtMKRKpOldXW/iYEoYzTHIQAodlWBiqkkG9B9RJeeTiTrlAALQMfK5ofAWz1xwxGREm20Hh0PdiTTkwCR8KnEkssN8v4gymHoGpsKAJONqCTYRvL3AaA06sR0Qja46c3sB+WECOiAEFDJhBbtq6FkQRERWoGWxngxfWBaKXAmUv/NgZDsXtgRM7jKYzjcBvQsUULetswgvQoInwsJrgqBB8xqPDQhr0MwpchWBc+/KYW6ChVzSQYkjsCiti0MVQf1aHubDWKa5D3UEFEG1BlgvIFvxWID4VPVs9oXPocKLDLke5gTB7XtPRcYuqB+nge9RgDLBuYCAV3JYhs3QMyZ6X6iIc96U2YaIgCJh8oYcfdDQVvtFBT/iUQZFd7jF7g/4iJFeZDNGGy5vgeVLxjIBkyj8BDaSvNiWQDikAAAAEc0JJVAgICAh8CGSIAAAES0lEQVQ4jU2V22+VRRTFf3tmvtOe0562pz2lHNtaKwSxSoCAUdAHAQVM5KL4pi88+aT/hjExPhmeNSYaEyMhPngJGhEIEqJCUC6xJUIvlN57Ts/1+2a2D1+J7GSSSSazsmettdfI+z8cuBJZdjqLtaI4A06UyAhZ205HlKfdZQFo+RqNpEzs6yjKo6WqXpBzzgezW0QBBSM4m6GU38TW3hcY7hqjK1MksilgHOqsNeeYqVznzsolFmoT+BADICIW1ZedDwCCImzoGGbfyAnGinvJujxNX2WttUS1MYsItNtO+ju2MNS1k2cHjjK+eI4/Z79mpTGdNiRiXOJTwKf6dnBi67sMdI4wX5vk4tRp7pavEvsKkRisKEJCLuriie5dbOk7wLaBo5TyY5y7e4rp8jVAcUkQrHE8P3iYvlyJS1Pfc2n6DL3ZPnZsOMhgfjM51w0E6skqD9ZuMbF0nvHlC+zceIItfft4pv8w9yt/ETRB3v7moDoRRgubKOaKLNSn2D96nN2lfWRMO2vxMtV4GYDOqJeOTA8tX+Xm/I9cf3CGvtwoq40Z5msTaYfegxrlzvI4k+UJ3ho7yd6h15irTnNx6lvurV6naKcIxlKjxKae7ewuHWHHxjdo+iqXpz5N+VsvlwSwj8h/e+EGTjJcuX+WQraXfY8fY6j1EWp6mc0c5+r8L5y+/QHbB15lqnwLr4IRRdbvy7EvDqk1qf+sBWeEyMBzgy/xzrb3yMbn8XMnQXLYjV9RN1s488/HTCz/hpWARXFGsYCIYrwH74XEs76UllfQiEr9Hq2VUxAq4OeoLn1CuTkLRLSCEgdIEJIgJApBBTn82SG1BpyBHhfTE8UUck02tnvG8p4RP0Oba5F4Q7COu3aIew1Y9Za6Opoa4dViRbGiuNgrqoJBeTFa5Eh+lo7+Gq4jZqWc5cyvT7N5eJHb/xbJtsW8+coNdvUmJGqohAznK8PcrBcJCAqYJEDslaYXzlaLXK72Ei1FuJohBCGfa/Lk4DKduSYiSuJTkwNcW+vn72ofrSAkKsQquJZPnwvKsjo+rwzSQnhdH2CsYWY+z53pAjPzXXR1NIlcoBEsPy8Nc6E8SBBDZNMsUBFM7FNyWwGSoKwmli/Lj/F7rQez5igVK4wOLpNrj+nON4ic5+JKiZ+WhqgnltgLLS8kPhXHtYISAFVQFSJVGghGFTKBSq2Nydluij01rA3EiaWRWOqxwdqHHhZQCKq4xINqKoyiKEK3Tdhgm3QX6ry6Z5wgwujIEhkTyESegbYaQZXgBV0fEiXduySkIKyDqSr5TEzBxiSRsiCWs3Ml2m3g4MAM3dKgGDWIxFMPEWgatU5J8zRJQK2CpmCo0C0xE60s390Z5I+1AvUQ4QxcWy2wp2+eXYVF2iShEiKQ1C6oogoy8uH+SWNk6OHYOQMDmQRnoKyZ9Esw/585C8W2JjGWltqURwFnUGP01n8z3Rt7XXup1wAAAABJRU5ErkJggg=="
+        pixmap = QPixmap()
+        pixmap.loadFromData(QByteArray.fromBase64(imgstring))
+        self.er_icon = QIcon(pixmap)
         self.settings = QSettings("myRadioDeutsch", "settings")
         self.setStyleSheet(mystylesheet(self))
         self.radioNames = []
@@ -168,7 +173,9 @@ class MainWin(QMainWindow):
         self.createStatusBar()
         self.setAcceptDrops(True)
         self.setWindowTitle("myRadio")
+        
         self.tIcon = QIcon(os.path.join(os.path.dirname(sys.argv[0]), "radio_bg.png"))
+        
         self.setWindowIcon(self.tIcon)
         self.stationActs = []
 
@@ -218,6 +225,9 @@ class MainWin(QMainWindow):
         self.flabel.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.flabel, 0, Qt.AlignCenter)            
         self.findRadio()
+        
+    def showTrayMessage(self, title, message, icon, timeout = 4000):
+        self.trayIcon.showMessage(title, message, icon, timeout)
             
     def findRadio(self):
         self.fr.setStyleSheet(mystylesheet(self))
@@ -247,7 +257,7 @@ class MainWin(QMainWindow):
             
     def handleError(self):
         print("Fehler: " + self.player.errorString())
-        self.trayIcon.showMessage("Error", self.player.errorString(), self.tIcon, 3000)
+        self.showTrayMessage("Error", self.player.errorString(), self.tIcon, 3000)
         self.msglbl.setText(f"Fehler:\n{self.player.errorString()}")
            
     def togglePlay(self):          
@@ -313,7 +323,7 @@ class MainWin(QMainWindow):
         for x in reversed(range(len(b))):
             line = b[x]
             if line == "":
-                print("leere Zeile:", x, "entfernt")
+                print("leere Zeile", x, "entfernt")
                 del(b[x])
                 
         i = 0
@@ -322,7 +332,10 @@ class MainWin(QMainWindow):
             while True:
                 if line.startswith("--"):
                     chm = self.tray_menu.addMenu(line.replace("-- ", "").replace(" --", ""))
-                    chm.setIcon(self.tIcon)
+                    if "Exclusive" in line:
+                        chm.setIcon(self.er_icon)
+                    else:
+                        chm.setIcon(self.tIcon)
                     break
                     continue
 
@@ -337,11 +350,11 @@ class MainWin(QMainWindow):
                     break
         ####################################
         self.tray_menu.addSeparator()
-        if self.is_recording == False:
+        if not self.is_recording:
             if not self.urlCombo.currentText().startswith("--"):
                 self.tray_menu.addAction(self.recordAction)
                 self.recordAction.setText("%s %s: %s" % ("starte Aufnahme von", "channel", self.urlCombo.currentText()))
-        if self.is_recording == True:
+        if self.is_recording:
             self.tray_menu.addAction(self.stopRecordAction)
         self.tray_menu.addSeparator()
         self.tray_menu.addAction(self.editAction)
@@ -429,7 +442,7 @@ class MainWin(QMainWindow):
         self.settings.setValue("index", self.urlCombo.currentIndex())
         self.settings.setValue("lastChannel", self.urlCombo.currentText())
         self.settings.setValue("notifications", self.notificationsEnabled)
-        if self.isVisible() == True:
+        if self.isVisible():
             self.settings.setValue("windowstate", "Hauptfenster anzeigen")
         else:
             self.settings.setValue("windowstate", "Hauptfenster nicht anzeigen")
@@ -460,7 +473,7 @@ class MainWin(QMainWindow):
     def edit_Channels(self):
         dir = os.path.dirname(sys.argv[0])
         self.radiofile = os.path.join(dir, "myradio.txt")
-        self.trayIcon.showMessage("Achtung", "Änderungen sind nach einem Neustart von myRadio verfügbar", self.tIcon, 2000)
+        self.showTrayMessage("Achtung", "Änderungen sind nach einem Neustart von myRadio verfügbar", self.tIcon)
         self.edWin = Editor()
         self.edWin.setWindowTitle("Sender-Editor")
         self.edWin.radiofile = self.radiofile
@@ -479,14 +492,13 @@ class MainWin(QMainWindow):
 
     def findExecutable(self):
         wget = QStandardPaths.findExecutable("wget")
-        print("wget:", wget)
         if wget != "":
             print("%s %s %s" % ("wget gefunden in ", wget, " *** Aufnahmen möglich"))
             self.msglbl.setText("Aufnahmen möglich")
-            self.trayIcon.showMessage("Note", "wget gefunden\nAufnahmen möglich", self.tIcon, 1500)
+            self.showTrayMessage("Note", "wget gefunden\nAufnahmen möglich", self.tIcon)
             self.recording_enabled = True
         else:
-            self.trayIcon.showMessage("Note", "wget nicht gefunden\nkeine Aufnahmen möglich", self.tIcon, 2000)
+            self.showTrayMessage("Note", "wget nicht gefunden\nkeine Aufnahmen möglich", self.tIcon)
             print("wget nicht gefunden\nkeine Aufnahmen möglich")
             self.recording_enabled = False
 
@@ -506,7 +518,7 @@ class MainWin(QMainWindow):
             trackInfo = (self.player.metaData("Title"))
             description = (self.player.metaData("Description"))
             comment = (self.player.metaData("Comment"))
-            if trackInfo == None:
+            if trackInfo is None:
                 self.msglbl.setText("%s %s" % ("spiele", self.urlCombo.currentText()))
             new_trackInfo = ""
             new_trackInfo = str(trackInfo)
@@ -526,10 +538,10 @@ class MainWin(QMainWindow):
             if description == None and comment == None:
                 mt = (f"{new_trackInfo}")
             if not mt == "None":
-                if self.notificationsEnabled == True:
+                if self.notificationsEnabled:
                     if not mt == self.old_meta:
                         print(mt)
-                        self.trayIcon.showMessage("myRadio", mt, self.tIcon, 2000)
+                        self.showTrayMessage("myRadio", mt, self.tIcon)
                         self.old_meta = mt
                     self.trayIcon.setToolTip(mt)
                 else:
@@ -583,7 +595,7 @@ class MainWin(QMainWindow):
         self.player.set_media(self.current_station)
         self.set_running_player()
         self.player.start()
-        if self.is_recording == True:
+        if self.is_recording:
             self.recordAction.setText(f"stoppe Aufnahme von {self.rec_name}")
             self.recordAction.setIcon(QIcon.fromTheme("media-playback-stop"))
         else:
@@ -659,7 +671,7 @@ class MainWin(QMainWindow):
         self.level_sld.blockSignals(False)
 
     def recordRadio1(self):
-        if self.is_recording == False:
+        if not self.is_recording:
             self.deleteOutFile()
             self.rec_url = self.current_station
             self.rec_name = self.urlCombo.currentText()
@@ -675,7 +687,7 @@ class MainWin(QMainWindow):
             self.stop_recording()
 
     def stop_recording(self):
-        if self.is_recording == True:
+        if self.is_recording:
             self.process.close()
             print("stoppe Aufnahme")
             self.is_recording = False
@@ -686,10 +698,10 @@ class MainWin(QMainWindow):
             self.recordAction.setText("%s %s: %s" % ("starte Aufnahme", "von", self.urlCombo.currentText()))
             self.recordAction.setIcon(QIcon.fromTheme("media-record"))
         else:
-            self.trayIcon.showMessage("Note", "keine Aufnahme gastartet", self.tIcon, 2000)
+            self.showTrayMessage("Note", "keine Aufnahme gastartet", self.tIcon)
 
     def saveMovie(self):
-        if self.is_recording == False:
+        if not self.is_recording:
             print("Aufnahme speichern")
             infile = QFile(self.outfile)
             path, _ = QFileDialog.getSaveFileName(None, "Speichern als...", 
@@ -1103,7 +1115,7 @@ class RadioFinder(QMainWindow):
             f.write('\n\n')
             f.close()
             self.modified = True
-            if self.modified == True:
+            if self.modified:
                 self.statusBar().showMessage("saved!", 0)
                 self.msgbox("neue Sender sind nach einem Neustart von myRadio verfügbar")            
             
@@ -1185,11 +1197,11 @@ class RadioFinder(QMainWindow):
             trackInfo = (self.player.metaData("Title"))
             trackInfo2 = (self.player.metaData("Comment"))
             my_metadata = f'{trackInfo}\n{trackInfo2}'
-            if not trackInfo == None:
+            if trackInfo is not None:
                 if not trackInfo == self.old_meta:
                     self.statusBar().showMessage(trackInfo, 0)
                     self.old_meta = trackInfo
-                if not trackInfo2 == None:
+                if trackInfo2 is not None:
                     if not self.old_meta == my_metadata:
                         self.statusBar().showMessage(my_metadata)
                         self.old_meta = my_metadata
