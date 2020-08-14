@@ -7,10 +7,10 @@ import base64
 from subprocess import call
 from PyQt5.QtCore import (Qt, QUrl, pyqtSignal, Qt, QMimeData, QSize, QPoint, QProcess, 
                             QStandardPaths, QFile, QDir, QSettings, QEvent, QByteArray)
-from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QSlider, QStatusBar, 
+from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QSlider, QStatusBar, QToolBar, 
                             QMainWindow, QFileDialog, QListView, QMenu, qApp, QAction, QLineEdit, 
                              QVBoxLayout, QHBoxLayout, QComboBox, QLabel, QSpacerItem, QSizePolicy, 
-                            QMessageBox, QPlainTextEdit, QSystemTrayIcon, QInputDialog)
+                            QMessageBox, QPlainTextEdit, QSystemTrayIcon, QInputDialog, QToolButton, )
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem, QVideoWidget
 from PyQt5.QtGui import QIcon, QPixmap, QPalette, QCursor, QStandardItem, QTextOption, QTextCursor
@@ -45,7 +45,7 @@ class Editor(QWidget):
                     print("Editor geschlossen")
             
     def saveFile(self):
-        with open(self.radiofile, 'w') as f:
+        with open(self.radiofile, 'w', encoding='utf8') as f:
             f.write(str(self.radio_editor.toPlainText()))
             f.close()
             return True
@@ -83,7 +83,7 @@ class MainWin(QMainWindow):
         self.recording_enabled = False
         self.is_recording = False
         ### combo box
-        self.urlCombo = QComboBox(self)
+        self.urlCombo = QComboBox()
 
         self.play_btn = QPushButton("Wiedergabe", self)
         self.play_btn.setFixedWidth(btnwidth)
@@ -145,7 +145,7 @@ class MainWin(QMainWindow):
         self.level_lbl = QLabel(self)
         self.level_lbl.setAlignment(Qt.AlignHCenter)
         self.level_lbl.setText("Lautstärke 65")
-        self.layout.addWidget(self.urlCombo)
+        #self.layout.addWidget(self.urlCombo)
         self.layout.addLayout(self.layout1)
         self.layout.addItem(spc1)
         self.layout.addWidget(self.level_sld)
@@ -208,6 +208,7 @@ class MainWin(QMainWindow):
         self.findExecutable()
         self.readSettings()
         self.makeTrayMenu()
+        self.createWindowMenu()
         if QSystemTrayIcon.isSystemTrayAvailable():
             print("System Tray Icon ist verfügbar")
         else:
@@ -312,6 +313,51 @@ class MainWin(QMainWindow):
                 url = str(html[0])
         print(url)
         return(url)
+        
+    def createWindowMenu(self):
+        self.tb = self.addToolBar("Menu")
+        self.tb_menu = QMenu()
+        self.tb.setIconSize(QSize(20, 20))
+        
+        ##### submenus from categories ##########
+        b = self.radioStations.splitlines()
+        for x in reversed(range(len(b))):
+            line = b[x]
+            if line == "":
+                print(f"empty line {x} removed")
+                del(b[x])
+               
+        i = 0
+        for x in range(0, len(b)):
+            line = b[x]
+            while True:
+                if line.startswith("--"):
+                    chm = self.tb_menu.addMenu(line.replace("-- ", "").replace(" --", ""))
+                    chm.setIcon(self.tIcon)
+                    break
+                    continue
+
+                elif not line.startswith("--"):
+                    menu_line = line.split(",")
+                    ch = menu_line[0]
+                    data = menu_line[1]
+                    if len(menu_line) > 2:
+                        image = menu_line[2]
+                    chm.addAction(self.stationActs[i])
+                    i += 1
+                    break
+        ####################################
+        toolButton = QToolButton()
+        toolButton.setIcon(self.tIcon)
+        toolButton.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        toolButton.setText("   Stationen")
+        toolButton.setMenu(self.tb_menu)
+        toolButton.setPopupMode(QToolButton.InstantPopup)
+        self.tb.addWidget(toolButton)
+
+        self.tb.setContextMenuPolicy(Qt.PreventContextMenu)
+        self.tb.setMovable(False)
+        self.tb.setAllowedAreas(Qt.TopToolBarArea)
         
     def makeTrayMenu(self):
         menuSectionIcon = QIcon(os.path.join(os.path.dirname(sys.argv[0]), "radio_bg.png"))
@@ -704,30 +750,26 @@ class MainWin(QMainWindow):
         if not self.is_recording:
             print("Aufnahme speichern")
             infile = QFile(self.outfile)
-            path, _ = QFileDialog.getSaveFileName(None, "Speichern als...", 
+            savefile, _ = QFileDialog.getSaveFileName(None, "Speichern als...", 
                             QDir.homePath() + "/Musik/" + self.rec_name
                             .replace("-", " ").replace(" - ", " ") + ".mp3", "Audio (*.mp3)")
-            if (path != ""):
-                savefile = path
+            if (savefile != ""):
                 if QFile(savefile).exists:
                     QFile(savefile).remove()
                 print("%s %s" % ("speichere", savefile))
                 if not infile.copy(savefile):
                     QMessageBox.warning(self, "Fehler",
-                        "Datei %s:\n%s." % (path, infile.errorString())) 
+                        "Datei %s:\n%s." % (savefile, infile.errorString())) 
                 print("%s %s" % ("Prozess-Status: ", str(self.process.state())))
                 if QFile(self.outfile).exists:
-                    print("existiert")
+                    print("%s %s" % ("lösche Datei", self.outfile))
                     QFile(self.outfile).remove()
-
 
     def deleteOutFile(self):
         if QFile(self.outfile).exists:
             print("%s %s" % ("lösche Datei", self.outfile)) 
-            if QFile(self.outfile).remove:
-                print("%s %s" % (self.outfile, "gelöscht"))  
-            else:  
-                print("%s %s" % (self.outfile, "nicht gelöscht"))
+            QFile(self.outfile).remove()
+            print("%s %s" % (self.outfile, "gelöscht"))  
 
     def getPID(self):
         print("%s %s" % (self.process.pid(), self.process.processId()))
@@ -783,7 +825,7 @@ class RadioPlayer(QMediaPlayer):
             self.driver.stop_preview()
     
 ################################################
-BASE_URL =  "https://de1.api.radio-browser.info/"
+BASE_URL = "https://de1.api.radio-browser.info/"
 
 endpoints = {
     "countries": {1: "{fmt}/countries", 2: "{fmt}/countries/{filter}"},
@@ -1311,7 +1353,8 @@ color: #1f3c5d;
 }
 QPushButton::hover
 {
-color: #1c87c9;
+background: #729fcf;
+color: #a40000;
 }
 QComboBox
 {
