@@ -3,17 +3,16 @@
 import os
 import sys
 import requests
-import base64
-from subprocess import call
-from PyQt5.QtCore import (Qt, QUrl, pyqtSignal, Qt, QMimeData, QSize, QPoint, QProcess, 
-                            QStandardPaths, QFile, QDir, QSettings, QEvent, QByteArray)
-from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QSlider, QStatusBar, QToolBar, 
-                            QMainWindow, QFileDialog, QListView, QMenu, qApp, QAction, QLineEdit, 
+#import base64
+#from subprocess import call
+from PyQt5.QtCore import (QUrl, pyqtSignal, Qt, QMimeData, QSize, QPoint, QProcess, 
+                            QStandardPaths, QFile, QDir, QSettings, QByteArray, QEvent)
+from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QSlider, 
+                            QMainWindow, QFileDialog, QMenu, qApp, QAction, QLineEdit, 
                              QVBoxLayout, QHBoxLayout, QComboBox, QLabel, QSpacerItem, QSizePolicy, 
                             QMessageBox, QPlainTextEdit, QSystemTrayIcon, QInputDialog, QToolButton, )
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem, QVideoWidget
-from PyQt5.QtGui import QIcon, QPixmap, QPalette, QCursor, QStandardItem, QTextOption, QTextCursor
+from PyQt5.QtGui import QIcon, QPixmap, QStandardItem, QTextOption, QTextCursor
 
 changed = pyqtSignal(QMimeData)
 btnwidth = 100
@@ -189,6 +188,8 @@ class MainWin(QMainWindow):
 
         self.trayIcon = QSystemTrayIcon()
         self.trayIcon.setIcon(trayIcon)
+        self.trayIcon.installEventFilter(self)
+        self.trayIcon.activated.connect(self.setTrayTrigger)
         self.trayIcon.show()
                 
         self.metaLabel = QLabel()
@@ -226,6 +227,29 @@ class MainWin(QMainWindow):
         self.flabel.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.flabel, 0, Qt.AlignCenter)            
         self.findRadio()
+        
+    def eventFilter(self, source, event):
+        if source is self.trayIcon:
+            if event.type() == QEvent.Wheel:
+                vol = self.level_sld.value()
+                if event.angleDelta().y() > 1:
+                    self.level_sld.setValue(int(vol) + 5)
+                else:
+                    self.level_sld.setValue(int(vol) - 5)
+        return super(MainWin, self).eventFilter(source, event)
+        
+    def setTrayTrigger(self, reason):
+        if reason == QSystemTrayIcon.DoubleClick:
+            self.showMainfromTray()
+        elif reason == QSystemTrayIcon.MiddleClick:
+            self.muteFromTray()
+
+        
+    def muteFromTray(self):
+        if self.player.isMuted():
+            self.player.setMuted(False)
+        else:
+            self.player.setMuted(True)
         
     def showTrayMessage(self, title, message, icon, timeout = 4000):
         self.trayIcon.showMessage(title, message, icon, timeout)
@@ -338,11 +362,6 @@ class MainWin(QMainWindow):
                     continue
 
                 elif not line.startswith("--"):
-                    menu_line = line.split(",")
-                    ch = menu_line[0]
-                    data = menu_line[1]
-                    if len(menu_line) > 2:
-                        image = menu_line[2]
                     chm.addAction(self.stationActs[i])
                     i += 1
                     break
@@ -360,7 +379,6 @@ class MainWin(QMainWindow):
         self.tb.setAllowedAreas(Qt.TopToolBarArea)
         
     def makeTrayMenu(self):
-        menuSectionIcon = QIcon(os.path.join(os.path.dirname(sys.argv[0]), "radio_bg.png"))
         self.tray_menu = QMenu()
         self.tray_menu.addAction(self.togglePlayerAction)
         self.tray_menu.setStyleSheet("font-size: 7pt;")
@@ -387,7 +405,6 @@ class MainWin(QMainWindow):
 
                 elif  not line.startswith("--"):
                     ch = line.partition(",")[0]
-                    data = line.partition(",")[2]
                     
                     self.stationActs.append(QAction(QIcon.fromTheme("browser"), ch, triggered = self.openTrayStation))
                     self.stationActs[i].setData(str(i))
@@ -419,7 +436,17 @@ class MainWin(QMainWindow):
         elif self.isVisible() ==True:
             self.showWinAction.setText("Hauptfenster anzeigen")
             self.setVisible(False)
-            
+
+    def showMainfromTray(self):
+        buttons = qApp.mouseButtons()
+        if buttons == Qt.LeftButton:
+            if self.isVisible() == False:
+                self.showWinAction.setText("hide Main Window")
+                self.setVisible(True)
+            elif self.isVisible() == True:
+                self.showWinAction.setText("show Main Window")
+                self.setVisible(False)
+                
     def toggleNotif(self):
         if self.notifAction.text() == "Tray Meldungen ausschalten":
             self.notifAction.setText("Tray Meldungen einschalten")
@@ -712,7 +739,7 @@ class MainWin(QMainWindow):
     def update_volume_slider(self, level):
         self.level_lbl.setText("Lautstärke " + str(level))
         self.level_sld.blockSignals(True)
-        self.level_sld.setValue(value)
+        self.level_sld.setValue(level)
         self.level_lbl.setText("Lautstärke " + str(level))
         self.level_sld.blockSignals(False)
 
