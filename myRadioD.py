@@ -236,6 +236,7 @@ class MainWin(QMainWindow):
                     self.level_sld.setValue(int(vol) + 5)
                 else:
                     self.level_sld.setValue(int(vol) - 5)
+                self.showTrayMessage("myRadio", f"Lautstärke {self.level_sld.value()}", self.tIcon, 1000)
         return super(MainWin, self).eventFilter(source, event)
         
     def setTrayTrigger(self, reason):
@@ -296,47 +297,33 @@ class MainWin(QMainWindow):
             self.togglePlayerAction.setIcon(QIcon.fromTheme("media-playback-stop"))
 
     def getURLfromPLS(self, inURL):
-        print("untersuche", inURL)
-        t = ""
-        if "&" in inURL:
-            inURL = inURL.partition("&")[0]
+        print("prüfe", inURL)
         response = requests.get(inURL)
-        print(response.text)
-        if "http" in response.text:
-            html = response.text.splitlines()
-            if len(html) > 3:
-                if "http" in str(html[1]):
-                    t = str(html[1])
-                elif "http" in str(html[2]):
-                    t = str(html[2])
-                elif "http" in str(html[3]):
-                    t = str(html[3])
-            elif len(html) > 2:
-                if "http" in str(html[1]):
-                    t = str(html[1])
-                elif "http" in str(html[2]):
-                    t = str(html[2])
-            else:
-                t = str(html[0])
-            url = t.partition("=")[2].partition("'")[0]
-            return (url)
-        else:
-           self.lbl.setText("schlechtes Format der Playlist") 
+        html = response.text.replace("https", "http").splitlines()
+        playlist = []
+
+        for line in html:
+
+            if line.startswith("File") == True:
+                    list = line.split("=", 1)
+                    playlist.append(list[1])
+
+        print("URL:", playlist[0])
+        return(playlist[0])
+
 
     def getURLfromM3U(self, inURL):
-        print("detecting", inURL)
+        print("prüfe", inURL)
         response = requests.get(inURL)
-        html = response.text.splitlines()
-        if "#EXTINF" in str(html):
-            url = str(html[1]).partition("http://")[2].partition('"')[0]
-            url = f"http://{url}"
-        else:
-            if len(html) > 1:
-                url = str(html[1])
-            else:
-                url = str(html[0])
-        print(url)
-        return(url)
+        html = response.text.replace("https", "http").splitlines()
+        playlist = []
+
+        for line in html:
+            if not line.startswith("#") and len(line) > 0 and line.startswith("http"):
+                playlist.append(line)
+
+        print("URL:", playlist[0])
+        return(playlist[0])
         
     def createWindowMenu(self):
         self.tb = self.addToolBar("Menu")
@@ -629,7 +616,7 @@ class MainWin(QMainWindow):
                 ind = self.urlCombo.currentIndex()
                 url = self.radiolist[ind]
                 
-                if url.endswith(".m3u"):
+                if url.endswith(".m3u") or url.endswith(".m3u8"):
                     url = self.getURLfromM3U(url)
                 if url.endswith(".pls"):
                     url = self.getURLfromPLS(url)
@@ -685,7 +672,7 @@ class MainWin(QMainWindow):
             print("is a pls")
             url = self.getURLfromPLS(clip.text())
             self.current_station = url
-        elif clip.text().endswith(".m3u") :
+        elif clip.text().endswith(".m3u") or clip.text().endswith(".m3u8"):
             print("is a m3u")
             url = self.getURLfromM3U(clip.text())
             self.current_station = url
@@ -1253,6 +1240,8 @@ class RadioFinder(QMainWindow):
                 url = self.getURLfromPLS(rtext)
             elif rtext.endswith(".m3u") :
                 url = self.getURLfromM3U(rtext)
+            elif rtext.endswith(".m3u8") :
+                url = self.getURLfromM3U(rtext)
             else:
                 url = rtext
             print("stream url=", url)
@@ -1276,48 +1265,32 @@ class RadioFinder(QMainWindow):
                         self.old_meta = my_metadata
 
     def getURLfromPLS(self, inURL):
-        print("detecting", inURL)
-        t = ""
-        if "&" in inURL:
-            inURL = inURL.partition("&")[0]
+        print("prüfe", inURL)
         response = requests.get(inURL)
-        print(response.text)
-        if "http" in response.text:
-            html = response.text.splitlines()
-            if len(html) > 3:
-                if "http" in str(html[1]):
-                    t = str(html[1])
-                elif "http" in str(html[2]):
-                    t = str(html[2])
-                elif "http" in str(html[3]):
-                    t = str(html[3])
-            elif len(html) > 2:
-                if "http" in str(html[1]):
-                    t = str(html[1])
-                elif "http" in str(html[2]):
-                    t = str(html[2])
-            else:
-                t = str(html[0])
-            url = t.partition("=")[2].partition("'")[0]
-            return (url)
-        else:
-           print("Liste schlecht formatiert") 
+        html = response.text.replace("https", "http").splitlines()
+        playlist = []
+
+        for line in html:
+
+            if line.startswith("File") == True:
+                    list = line.split("=", 1)
+                    playlist.append(list[1])
+
+        print("URL:", playlist[0])
+        return(playlist[0])
     
     def getURLfromM3U(self, inURL):
-        print("detecting", inURL)
+        print("prüfe", inURL)
         response = requests.get(inURL)
-        html = response.text.splitlines()
-        print(html)
-        if "#EXTINF" in str(html):
-            url = str(html[1]).partition("http://")[2].partition('"')[0]
-            url = f"http://{url}"
-        else:       
-            if len(html) > 1:
-                url = str(html[1])
-            else:
-                url = str(html[0])
-        print(url)
-        return(url)
+        html = response.text.replace("https", "http").splitlines()
+        playlist = []
+
+        for line in html:
+            if not line.startswith("#") and len(line) > 0  and line.startswith("http"):
+                playlist.append(line)
+
+        print("URL:", playlist[0])
+        return(playlist[0])
 
     def findStations(self):
         self.field.setPlainText("")
