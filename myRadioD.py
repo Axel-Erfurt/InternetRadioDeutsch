@@ -249,8 +249,10 @@ class MainWin(QMainWindow):
     def muteFromTray(self):
         if self.player.isMuted():
             self.player.setMuted(False)
+            print("Player nicht stummgeschaltet")
         else:
             self.player.setMuted(True)
+            print("Player stummgeschaltet")
         
     def showTrayMessage(self, title, message, icon, timeout = 4000):
         self.trayIcon.showMessage(title, message, icon, timeout)
@@ -496,6 +498,18 @@ class MainWin(QMainWindow):
             vol = self.settings.value("volume")
             print("setze Lautstärke auf", vol)
             self.level_sld.setValue(int(vol))
+        if self.settings.contains("muted"):
+            if self.settings.value("muted") == "false":
+                self.player.setMuted(False)
+                print("Player nicht stummgeschaltet")
+            else:
+                self.player.setMuted(True)
+                print("Player stummgeschaltet")
+        if self.settings.contains("playerstate"):
+            if self.settings.value("playerstate") == "0":
+                self.player.stop()
+            else:
+                self.player.play()
                 
     def writeSettings(self):
         self.settings.setValue("pos", self.pos())
@@ -507,6 +521,8 @@ class MainWin(QMainWindow):
         else:
             self.settings.setValue("windowstate", "Hauptfenster nicht anzeigen")
         self.settings.setValue("volume", self.level_sld.value())
+        self.settings.setValue("muted", self.player.isMuted())
+        self.settings.setValue("playerstate", self.player.state())
         self.settings.sync()
 
     def readStations(self):
