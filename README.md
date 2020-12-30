@@ -8,6 +8,8 @@ __Voraussetzungen:__
 - PyQt5 Multimedia
 - gstreamer
 
+Mit dem Script myradio_Webpage.py macht man aus der myradio.txt eine Website Version.
+
 Anleitung -> [myRadio UbuntuUsers Wiki 🇩🇪](https://wiki.ubuntuusers.de/Howto/myRadio/)
 
 __Installation Mint / Ubuntu__
