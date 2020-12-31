@@ -145,8 +145,8 @@ window.addEventListener("play", function(evt)
 }, true);
 //]]>
 </script>
-</head>
 <title>myRadio WebPlayer</title>
+</head>
 <body>
 <div class="content">
 <h2>Kategorien</h2>
@@ -155,7 +155,6 @@ window.addEventListener("play", function(evt)
 
 html_bottom = """</table>
 </body>
-</head>
 </html>
 """
 html_code = html_top
