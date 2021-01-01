@@ -11,6 +11,7 @@ result = []
 
 myradio_file = os.path.join(os.path.expanduser("~"), ".local/share/InternetRadioDeutsch/myradio.txt")
 myradio_webfile = os.path.join(os.path.expanduser("~"), ".local/share/InternetRadioDeutsch/myradio.html")
+myradio_cssfile = os.path.join(os.path.expanduser("~"), ".local/share/InternetRadioDeutsch/style.css")
 
 audio_element = """<figure>
     <figcaption>myname</figcaption>
@@ -52,15 +53,9 @@ mygenres = []
 ### Links oben
 for genre in genreList:
     mygenres.append(f'<a href="#{genre}"><h5>{genre}</h5></a>')
-###
-
-html_top = """<!DOCTYPE html>
-  <html>
-    <head>
-      <title>Exclusive Radio Player</title>
-      <script type="text/javascript" src="https://cdn.jsdelivr.net/g/jquery@3.1.0,mark.js@8.6.0(jquery.mark.min.js)"></script>
-      <style>
-        body {
+    
+### css
+css = """        body {
             background-color: #202F1F;
             color: #e9e9e9;
             font-family: Helvetica,Verdana;
@@ -191,7 +186,15 @@ html_top = """<!DOCTYPE html>
             border: 1px inset #c4a000;
             border-radius: 3px;
         }
-      </style>
+"""
+
+### html
+html_top = """<!DOCTYPE html>
+  <html>
+    <head>
+      <title>Exclusive Radio Player</title>
+      <script type="text/javascript" src="https://cdn.jsdelivr.net/g/jquery@3.1.0,mark.js@8.6.0(jquery.mark.min.js)"></script>
+      <link rel="stylesheet" href="style.css" media="all">
       <script>
         $(document).ready(function(){
         $(function() {
@@ -310,7 +313,10 @@ html_code += "\n".join(mygenres)
 html_code += result
 html_code += html_bottom
 
-#print(html_code)
+with open(myradio_cssfile, 'w', encoding='utf8') as f:
+    f.write(css)
+    f.close()
+    
 with open(myradio_webfile, 'w', encoding='utf8') as f:
     f.write(html_code)
     f.close()
