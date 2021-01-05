@@ -1,24 +1,28 @@
 # InternetRadioDeutsch 🇩🇪
 Tray Radio App Deutsch
 
-__Voraussetzungen:__
+### Voraussetzungen:
 
 - python 3.6
 - PyQt5
 - PyQt5 Multimedia
 - gstreamer
 
-Mit dem Script myradio_Webpage.py macht man aus der myradio.txt eine Website Version.
-
 Anleitung -> [myRadio UbuntuUsers Wiki 🇩🇪](https://wiki.ubuntuusers.de/Howto/myRadio/)
 
-__Installation Mint / Ubuntu__
+### Installation Mint / Ubuntu
 
 `wget 'https://raw.githubusercontent.com/Axel-Erfurt/InternetRadioDeutsch/master/InternetRadioDeutschInstallation.sh' -O ~/Downloads/InternetRadioDeutschInstallation.sh && chmod +x ~/Downloads/InternetRadioDeutschInstallation.sh && ~/Downloads/InternetRadioDeutschInstallation.sh `
 
-__Deinstallation Mint / Ubuntu__
+### Deinstallation Mint / Ubuntu
 
 `rm -rf ~/.local/share/applications/InternetRadioDeutsch.desktop && rm -rf ~/.local/share/InternetRadioDeutsch`
+
+### Web Version
+
+Mit dem Script myradio_Webpage.py macht man aus der myradio.txt eine Website Version.
+
+Style anpassen in *_player.css_*
 
 [64bit App Version 🇩🇪](https://dl.dropbox.com/s/1nk20f6e31lzvav/myRadioD.tar.gz)
 
