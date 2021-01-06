@@ -3,8 +3,7 @@
 import os
 import sys
 import requests
-#import base64
-#from subprocess import call
+
 from PyQt5.QtCore import (QUrl, pyqtSignal, Qt, QMimeData, QSize, QPoint, QProcess, 
                             QStandardPaths, QFile, QDir, QSettings, QByteArray, QEvent)
 from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QSlider, 
@@ -153,7 +152,7 @@ class MainWin(QMainWindow):
         self.player = RadioPlayer(self)
         self.player.metaDataChanged.connect(self.metaDataChanged)
         self.player.error.connect(self.handleError)
-        self.play_btn.clicked.connect(self.playRadioStation)
+        self.play_btn.clicked.connect(self.togglePlay)
         self.pause_btn.clicked.connect(self.pause_preview)
         self.stop_btn.clicked.connect(self.stop_preview)
         self.level_sld.valueChanged.connect(self.set_sound_level)
@@ -346,7 +345,10 @@ class MainWin(QMainWindow):
             while True:
                 if line.startswith("--"):
                     chm = self.tb_menu.addMenu(line.replace("-- ", "").replace(" --", ""))
-                    chm.setIcon(self.tIcon)
+                    if "Exclusive" in line:
+                        chm.setIcon(self.er_icon)
+                    else:
+                        chm.setIcon(self.tIcon)
                     break
                     continue
 
@@ -508,8 +510,10 @@ class MainWin(QMainWindow):
         if self.settings.contains("playerstate"):
             if self.settings.value("playerstate") == "0":
                 self.player.stop()
+                self.togglePlayerAction.setText("Wiedergabe starten")
             else:
                 self.player.play()
+                self.togglePlayerAction.setText("Wiedergabe stoppen")
                 
     def writeSettings(self):
         self.settings.setValue("pos", self.pos())
@@ -627,6 +631,7 @@ class MainWin(QMainWindow):
             self.msglbl.setText("%s %s" % ("spiele", self.urlCombo))
 
     def url_changed(self):
+        self.player.stop()
         if self.urlCombo.currentIndex() < self.urlCombo.count() - 1:
             if not self.urlCombo.currentText().startswith("--"):
                 ind = self.urlCombo.currentIndex()
@@ -1252,18 +1257,10 @@ class RadioFinder(QMainWindow):
         rtext = tc.selectedText().partition(",")[2]
         stext = tc.selectedText().partition(",")[0]
         if not rtext == "":
-            if rtext.endswith(".pls") :
-                url = self.getURLfromPLS(rtext)
-            elif rtext.endswith(".m3u") :
-                url = self.getURLfromM3U(rtext)
-            elif rtext.endswith(".m3u8") :
-                url = self.getURLfromM3U(rtext)
-            else:
-                url = rtext
+            url = rtext
             print("stream url=", url)
             self.player.setMedia(QMediaContent(QUrl(url)))
             self.player.play()
-            #print("V:", self.player.volume())
             self.statusBar().showMessage("%s %s" % ("spiele", stext), 0)
 
     def metaDataChanged(self):
@@ -1279,34 +1276,6 @@ class RadioFinder(QMainWindow):
                     if not self.old_meta == my_metadata:
                         self.statusBar().showMessage(my_metadata)
                         self.old_meta = my_metadata
-
-    def getURLfromPLS(self, inURL):
-        print("prüfe", inURL)
-        response = requests.get(inURL)
-        html = response.text.replace("https", "http").splitlines()
-        playlist = []
-
-        for line in html:
-
-            if line.startswith("File") == True:
-                    list = line.split("=", 1)
-                    playlist.append(list[1])
-
-        print("URL:", playlist[0])
-        return(playlist[0])
-    
-    def getURLfromM3U(self, inURL):
-        print("prüfe", inURL)
-        response = requests.get(inURL)
-        html = response.text.replace("https", "http").splitlines()
-        playlist = []
-
-        for line in html:
-            if not line.startswith("#") and len(line) > 0  and line.startswith("http"):
-                playlist.append(line)
-
-        print("URL:", playlist[0])
-        return(playlist[0])
 
     def findStations(self):
         self.field.setPlainText("")
@@ -1327,7 +1296,7 @@ class RadioFinder(QMainWindow):
             for key,value in r[i].items():
                 if str(key) == "name":
                     n = value.replace(",", " ")
-                if str(key) == "url":
+                if str(key) == "url_resolved":
                     m = value
                     self.field.appendPlainText("%s,%s" % (n, m))
         if not self.field.toPlainText() == "":
@@ -1461,5 +1430,5 @@ if __name__ == "__main__":
     app = QApplication([])
     win = MainWin()
     app.setQuitOnLastWindowClosed(False)
-    #win.show()
+    win.show()
     sys.exit(app.exec_())
