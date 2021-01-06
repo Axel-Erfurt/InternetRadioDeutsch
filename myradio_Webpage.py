@@ -36,6 +36,7 @@ html_top = """<!DOCTYPE html>
 <html>
 
   <head>
+    <meta charset="utf-8"/>
     <title>Radio Player</title>
     <script type="text/javascript" src="list.min.js"></script>
     <script type="text/javascript" src="jquery-1.10.1.js"></script>
