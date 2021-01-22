@@ -424,19 +424,22 @@ class MainWin(QMainWindow):
         if self.isVisible() ==False:
             self.showWinAction.setText("Hauptfenster verbergen")
             self.setVisible(True)
+            print("Hauptfenster wird angezeigt")
         elif self.isVisible() ==True:
             self.showWinAction.setText("Hauptfenster anzeigen")
             self.setVisible(False)
+            print("Hauptfenster wird nicht angezeigt")
 
     def showMainfromTray(self):
         buttons = qApp.mouseButtons()
         if buttons == Qt.LeftButton:
-            if self.isVisible() == False:
-                self.showWinAction.setText("hide Main Window")
-                self.setVisible(True)
-            elif self.isVisible() == True:
-                self.showWinAction.setText("show Main Window")
-                self.setVisible(False)
+            self.showMain()
+            #if self.isVisible() == False:
+            #    self.showWinAction.setText("Hauptfenster verbergen")
+            #    self.setVisible(True)
+            #elif self.isVisible() == True:
+            #    self.showWinAction.setText("Hauptfenster anzeigen")
+            #    self.setVisible(False)
                 
     def toggleNotif(self):
         if self.notifAction.text() == "Tray Meldungen ausschalten":
@@ -1430,5 +1433,4 @@ if __name__ == "__main__":
     app = QApplication([])
     win = MainWin()
     app.setQuitOnLastWindowClosed(False)
-    win.show()
     sys.exit(app.exec_())
