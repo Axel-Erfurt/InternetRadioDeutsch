@@ -113,10 +113,7 @@ class Viewer(QMainWindow):
                      quit_msg, QMessageBox.Yes, QMessageBox.No)
             if reply == QMessageBox.Yes:
                 event.accept()
-                if self.filename == "":
-                    self.writeCSV()
-                else:
-                    self.save_file(self.filename)
+                self.save_file(self.filename)
         else:
             print("keine Änderungen. Auf Wiedersehen")
 
@@ -267,6 +264,7 @@ class Viewer(QMainWindow):
                 self.statusBar().showMessage(f"{fileName} loaded", 0)
                 self.model.setChanged = False
                 self.lb.verticalHeader().setMinimumWidth(24)
+                self.filename = fileName
              
     def convert_to_csv(self, fileName):
         #mychannels_file = 'myradio.txt'
