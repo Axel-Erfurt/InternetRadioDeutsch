@@ -18,6 +18,16 @@ Anleitung -> [myRadio UbuntuUsers Wiki 🇩🇪](https://wiki.ubuntuusers.de/How
 
 `rm -rf ~/.local/share/applications/InternetRadioDeutsch.desktop && rm -rf ~/.local/share/InternetRadioDeutsch`
 
+### Editor
+
+```python3 ~/.local/share/InternetRadioDeutsch/myRadioEditorDE.py```
+
+- Spalte 1 -> Name
+- Spalte 2 -> Gruppe
+- Spalte 3 -> URL
+
+![editor](https://raw.githubusercontent.com/Axel-Erfurt/InternetRadioDeutsch/master/editorshot.png)
+
 ### Web Version
 
 Mit dem Script myradio_Webpage.py macht man aus der myradio.txt eine Website Version.
