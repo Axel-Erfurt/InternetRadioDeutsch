@@ -3,7 +3,7 @@
 import os
 import sys
 import requests
-
+import editor_intern
 from PyQt5.QtCore import (QUrl, pyqtSignal, Qt, QMimeData, QSize, QPoint, QProcess, 
                             QStandardPaths, QFile, QDir, QSettings, QByteArray, QEvent)
 from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QSlider, 
@@ -61,10 +61,14 @@ class MainWin(QMainWindow):
         self.er_icon = QIcon(pixmap)
         self.settings = QSettings("myRadioDeutsch", "settings")
         self.setStyleSheet(mystylesheet(self))
+
+        dir = os.path.dirname(sys.argv[0])
+        os.chdir(dir)
+        self.radiofile = os.path.join(dir, "myradio.txt")
+        
         self.radioNames = []
         self.radiolist = []
         self.channels = []
-        self.radiofile = ""
         self.radioStations = ""
         self.rec_name = ""
         self.rec_url = ""
@@ -116,13 +120,13 @@ class MainWin(QMainWindow):
         self.stoprec_btn.clicked.connect(self.stop_recording)
         self.stoprec_btn.setToolTip("Aufnahme stoppen")
         self.layout1.addWidget(self.stoprec_btn)
-        ### edit Radiio List
+        ### edit Radiio List Text
         self.edit_btn = QPushButton("", self)
         self.edit_btn.setFixedWidth(26)
         self.edit_btn.setFlat(True)
         self.edit_btn.setToolTip("Sender Editor")
         self.edit_btn.setIcon(QIcon.fromTheme("preferences-system"))
-        self.edit_btn.clicked.connect(self.edit_Channels)
+        self.edit_btn.clicked.connect(self.edit_Channels_Text)
         self.layout1.addWidget(self.edit_btn)
         ### hide Main Window
         self.hide_btn = QPushButton("", self)
@@ -132,8 +136,6 @@ class MainWin(QMainWindow):
         self.hide_btn.setIcon(QIcon.fromTheme("window-hide"))
         self.hide_btn.clicked.connect(self.showMain)
         self.layout1.addWidget(self.hide_btn)        
-        
-
 
         spc1 = QSpacerItem(6, 10, QSizePolicy.Expanding, QSizePolicy.Maximum)
         self.level_sld = QSlider(self)
@@ -196,8 +198,10 @@ class MainWin(QMainWindow):
         self.geo = self.geometry()
         self.findRadioAction = QAction(QIcon.fromTheme("edit-find"), "Radiostationen suchen", 
                                     triggered = self.findRadio)
-        self.editAction = QAction(QIcon.fromTheme("preferences-system"), "Senderliste bearbeiten", 
-                                    triggered = self.edit_Channels)
+        self.editAction = QAction(QIcon.fromTheme("preferences-system"), "Senderliste bearbeiten (Text)", 
+                                    triggered = self.edit_Channels_Text)
+        self.editActionTable = QAction(QIcon.fromTheme("preferences-system"), "Senderliste bearbeiten (Tabelle)", 
+                                    triggered = self.edit_Channels_Table)
         self.showWinAction = QAction(QIcon.fromTheme("view-restore"), "Hauptfenster anzeigen", triggered = self.showMain)
         self.notifAction = QAction(QIcon.fromTheme("dialog-information"), "Tray Meldungen ausschalten", triggered = self.toggleNotif)
         self.togglePlayerAction = QAction("Wiedergabe stoppen", triggered = self.togglePlay)
@@ -412,6 +416,7 @@ class MainWin(QMainWindow):
             self.tray_menu.addAction(self.stopRecordAction)
         self.tray_menu.addSeparator()
         self.tray_menu.addAction(self.editAction)
+        self.tray_menu.addAction(self.editActionTable)
         self.tray_menu.addAction(self.showWinAction)
         self.tray_menu.addSeparator()
         self.tray_menu.addAction(self.notifAction)
@@ -539,6 +544,7 @@ class MainWin(QMainWindow):
         self.channels = []
         dir = os.path.dirname(sys.argv[0])
         self.radiofile = os.path.join(dir, "myradio.txt")
+        print(self.radiofile)
         with open(self.radiofile, 'r') as f:
             self.radioStations = f.read()
             f.close()
@@ -553,7 +559,19 @@ class MainWin(QMainWindow):
                     self.urlCombo.model().appendRow(m)            
                 self.radiolist.append(lines.partition(",")[2])
 
-    def edit_Channels(self):
+    def edit_Channels_Table(self):
+        print("edit_Channels_Table")
+        dir = os.path.dirname(sys.argv[0])
+        self.radiofile = os.path.join(dir, "myradio.txt")
+        if QFile.exists(self.radiofile):
+            self.editor = editor_intern.Viewer()
+            self.editor.open_channels(self.radiofile)
+            self.editor.show()
+        else:
+            self.msgbox('myradio.txt nicht gefunden')
+
+        
+    def edit_Channels_Text(self):
         dir = os.path.dirname(sys.argv[0])
         self.radiofile = os.path.join(dir, "myradio.txt")
         self.showTrayMessage("Achtung", "Änderungen sind nach einem Neustart von myRadio verfügbar", self.tIcon)
