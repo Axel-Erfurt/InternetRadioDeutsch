@@ -2,81 +2,26 @@
 # -*- coding: utf-8 -*-
 import sys
 import shutil
-import pandas as pd
-from PyQt5.QtCore import Qt, QDir, QAbstractTableModel, QModelIndex, QVariant, QSize, QFile
+import csv
+from PyQt5.QtCore import Qt, QDir, QModelIndex, QVariant, QSize, QFile
 from PyQt5.QtWidgets import (QMainWindow, QTableView, QApplication, QLineEdit, QWidget,  
                              QFileDialog, QAbstractItemView, QMessageBox, QToolButton, QSizePolicy)
-from PyQt5.QtGui import QIcon, QKeySequence
+from PyQt5.QtGui import QIcon, QKeySequence, QStandardItemModel, QStandardItem
 
-class PandasModel(QAbstractTableModel):
-    def __init__(self, df = pd.DataFrame(), parent=None): 
-        QAbstractTableModel.__init__(self, parent=None)
-        self._df = df
-        self.setChanged = False
-        self.dataChanged.connect(self.setModified)
-
-    def setModified(self):
-        self.setChanged = True
-        print(self.setChanged)
-
-    def headerData(self, section, orientation, role=Qt.DisplayRole):
-        if role != Qt.DisplayRole:
-            return QVariant()
-        if orientation == Qt.Horizontal:
-            try:
-                return self._df.columns.tolist()[section]
-            except (IndexError, ):
-                return QVariant()
-        elif orientation == Qt.Vertical:
-            try:
-                return self._df.index.tolist()[section]
-            except (IndexError, ):
-                return QVariant()
-
-    def flags(self, index):
-        return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
-
-    def data(self, index, role=Qt.DisplayRole):
-        if index.isValid():
-            if (role == Qt.EditRole):
-                return self._df.values[index.row()][index.column()]
-            elif (role == Qt.DisplayRole):
-                return self._df.values[index.row()][index.column()]
-        return None
-
-    def setData(self, index, value, role):
-        row = self._df.index[index.row()]
-        col = self._df.columns[index.column()]
-        self._df.values[row][col] = value
-        self.dataChanged.emit(index, index)
-        return True
-
-    def rowCount(self, parent=QModelIndex()): 
-        return len(self._df.index)
-
-    def columnCount(self, parent=QModelIndex()): 
-        return len(self._df.columns)
-
-    def sort(self, column, order):
-        colname = self._df.columns.tolist()[column]
-        self.layoutAboutToBeChanged.emit()
-        self._df.sort_values(colname, ascending= order == Qt.AscendingOrder, inplace=True)
-        self._df.reset_index(inplace=True, drop=True)
-        self.layoutChanged.emit()
 
 class Viewer(QMainWindow):
     def __init__(self, parent=None):
       super(Viewer, self).__init__(parent)
-      self.df = None
       self.filename = ""
       self.fname = ""
       self.csv_file = ''
+      self.isChanged = False
       self.mychannels_file = 'myradio.txt'
       self.mychannels_file_backup = 'myradio.txt_backup'
       self.setGeometry(0, 0, 1000, 600)
       self.lb = QTableView()
       self.lb.horizontalHeader().hide()
-      self.model =  PandasModel()
+      self.model = QStandardItemModel()
       self.lb.setModel(self.model)
       self.lb.setEditTriggers(QAbstractItemView.DoubleClicked)
       self.lb.setSelectionBehavior(self.lb.SelectRows)
@@ -94,7 +39,11 @@ class Viewer(QMainWindow):
       self.create_backup()
       self.show()
       print("Hello")
+      self.open_channels(self.mychannels_file)
       self.lb.setFocus()
+      
+    def setChanged(self):
+        self.isChanged = True
       
     def msgbox(self, message):
         msg = QMessageBox(2, "Information", message, QMessageBox.Ok)
@@ -106,8 +55,8 @@ class Viewer(QMainWindow):
             self.msgbox('myradio.txt_backup wurde erstellt')
 
     def closeEvent(self, event):
-        print(self.model.setChanged)
-        if  self.model.setChanged == True:
+        print(self.isChanged)
+        if  self.isChanged == True:
             quit_msg = "<b>Das Dokument wurde geändert.<br>Wollen Sie die Änderungen speichern?</ b>"
             reply = QMessageBox.question(self, 'Speichern', 
                      quit_msg, QMessageBox.Yes, QMessageBox.No)
@@ -115,7 +64,7 @@ class Viewer(QMainWindow):
                 event.accept()
                 self.save_file(self.filename)
         else:
-            print("keine Änderungen. Auf Wiedersehen")
+            print("keine Änderungen.")
 
     def createMenuBar(self):
         bar=self.menuBar()
@@ -192,46 +141,44 @@ class Viewer(QMainWindow):
     def move_down(self):
         if self.model.rowCount() < 1:
             return
-        i = self.lb.selectionModel().selection().indexes()[0].row()
-        b, c = self.df.iloc[i].copy(), self.df.iloc[i+1].copy()
-        self.df.iloc[i],self.df.iloc[i+1] = c,b
-        self.model.setChanged = True
-        self.lb.selectRow(i+1)
+        row = self.lb.selectionModel().selection().indexes()[0].row()
+        nextrow = row + 1
+        itemList = self.model.takeRow(row)
+        self.model.insertRow(nextrow,itemList)
+        self.isChanged = True
+        self.lb.selectRow(nextrow)
         
     def move_up(self):
         if self.model.rowCount() < 1:
             return
-        i = self.lb.selectionModel().selection().indexes()[0].row()
-        b, c = self.df.iloc[i].copy(), self.df.iloc[i-1].copy()
-        self.df.iloc[i],self.df.iloc[i-1] = c,b
-        self.model.setChanged = True
-        self.lb.selectRow(i-1)
+        row = self.lb.selectionModel().selection().indexes()[0].row()
+        nextrow = row - 1
+        itemList = self.model.takeRow(row)
+        self.model.insertRow(nextrow,itemList)
+        self.isChanged = True
+        self.lb.selectRow(nextrow)
         
     def del_row(self): 
         if self.model.rowCount() < 1:
             return
-        i = self.lb.selectionModel().selection().indexes()[0].row()
-        if len(self.df.index) > 0:
-            self.df = self.df.drop(self.df.index[i])
-            self.model = PandasModel(self.df)
-            self.lb.setModel(self.model)
-            self.model.setChanged = True
-            self.lb.selectRow(i)
+        row = self.lb.selectionModel().selection().indexes()[0].row()
+        self.model.takeRow(row)
+        self.isChanged = True
+        self.lb.selectRow(row)
             
     def add_row(self): 
         if self.model.rowCount() < 1:
             return
         print("Zeile hinzufügen")
-        newrow = {0:'name', 1:'url'}       
-        self.df = self.df.append(newrow, ignore_index=True)
-        self.model = PandasModel(self.df)
-        self.lb.setModel(self.model)
-        self.model.setChanged = True
+        newrow = ['name', 'group', 'url']       
+        items = [QStandardItem(field) for field in newrow]
+        self.model.appendRow(items)
+        self.isChanged = True
         self.lb.selectRow(self.model.rowCount() - 1)
                 
 
     def load_channels_file(self):
-        if self.model.setChanged == True:
+        if self.isChanged == True:
             save_msg = "<b>Das Dokument wurde geändert.<br>Wollen Sie die Änderungen speichern?</ b>"
             reply = QMessageBox.question(self, 'Speichern', 
                      save_msg, QMessageBox.Yes, QMessageBox.No)
@@ -239,30 +186,29 @@ class Viewer(QMainWindow):
                 self.writeCSV()
                 self.open_channels()
             else:
-                self.model.setChanged = False
+                self.isChanged = False
                 self.open_channels()
         else:
-            self.model.setChanged = False
+            self.isChanged = False
             self.open_channels()
-            
-    #def openFile(self, path=None):
-    #    tvplayer_folder = f'{QDir.homePath()}/.local/share/InternetRadioDeutsch/'
-    #    path, _ = QFileDialog.getOpenFileName(self, "Datei öffnen", tvplayer_folder,"myRadio Listen (*.txt)")
-    #    if path:
-    #        self.open_channels(path)
         
     def open_channels(self, fileName):
         if fileName:
             self.convert_to_csv(fileName)
             print(fileName + " geladen")
-            with open(self.csv_file, 'r+b') as f:
-                self.df = pd.read_csv(f, delimiter = '\t', keep_default_na = False, low_memory=False, header=None)
-                self.model = PandasModel(self.df)
-                self.lb.setModel(self.model)
-                self.lb.resizeColumnsToContents()
+            with open(self.csv_file, 'r') as f:
+                i = 0
+                reader = csv.reader(f, delimiter = '\t')
+                self.model.clear()
+                for row in reader:  
+                    items = [QStandardItem(field) for field in row]
+                    self.model.appendRow(items)
+                    self.model.setHeaderData(i - 1, Qt.Horizontal, str(i))
+                    i = i + 1     
+                self.lb.resizeColumnsToContents()           
                 self.lb.selectRow(0)
                 self.statusBar().showMessage(f"{fileName} loaded", 0)
-                self.model.setChanged = False
+                self.isChanged = False
                 self.lb.verticalHeader().setMinimumWidth(24)
                 self.filename = fileName
              
@@ -309,12 +255,22 @@ class Viewer(QMainWindow):
             self.save_file(fileName)
             
     def save_file(self, fileName):
-            # save temporary csv
-            f = open(self.csv_file, 'w')
-            newModel = self.model
-            dataFrame = newModel._df.copy()
-            dataFrame.to_csv(f, sep='\t', index = False, header = False)  
-            f.close()
+        # save temporary csv
+        f = open(self.csv_file, 'w')
+
+        content = ""
+        
+        for row in range(self.lb.model().rowCount()):
+            itemlist = []
+            for column in range(self.lb.model().columnCount()):
+                itemlist.append(self.model.item(row, column).text())
+            
+            content += '\t'.join(itemlist)
+            content += '\n'
+        with open(self.csv_file, 'w') as f:
+            f.write(content)
+            
+                
             
             # convert to txt
             channels_list = open(self.csv_file, 'r').read().splitlines()
@@ -341,7 +297,7 @@ class Viewer(QMainWindow):
                 f.write(m3u_content)
 
             print(fileName + " gespeichert")
-            self.model.setChanged = False
+            self.isChanged = False
             
     def ordered_set(self, in_list):
         out_list = []
@@ -361,24 +317,49 @@ class Viewer(QMainWindow):
         if searchterm == "":
             return
         else:
-            if len(self.df.index) > 0:
-                self.df.replace(searchterm, replaceterm, inplace=True, regex=True)
+            for i in range(self.lb.model().columnCount() - 1):
+                indexes = self.lb.model().match(
+                                    self.lb.model().index(0, i),
+                                    Qt.DisplayRole,
+                                    searchterm,
+                                    -1,
+                                    Qt.MatchContains
+                                )
+                for ix in indexes:
+                    old_item = self.model.item(ix.row(), i)
+                    new_item = old_item.text().replace(searchterm, replaceterm)
+                    self.model.setItem(ix.row(), i, QStandardItem(new_item))
                 self.lb.resizeColumnsToContents()
-                self.model.setChanged = True
+                self.isChanged = True
                 
     def filter_table(self):
         if self.model.rowCount() < 1:
             return
-        index = 0
-        searchterm = self.filter_field.text()
-        df_filtered = self.df[self.df[index].str.contains(searchterm, case=False)]
-        self.model = PandasModel(df_filtered)
-        self.lb.setModel(self.model)
-        self.lb.resizeColumnsToContents()       
+        searchterm = self.filter_field.text()  
+    
+        row_list = []
+        self.lb.clearSelection()
+
+        for i in range(self.lb.model().columnCount()-1):
+            indexes = self.lb.model().match(
+                                self.lb.model().index(0, i),
+                                Qt.DisplayRole,
+                                searchterm,
+                                -1,
+                                Qt.MatchContains
+                            )
+            for ix in indexes:
+                self.lb.selectRow(ix.row())    
+                row_list.append(ix.row()) 
+                
+        for x in range(self.lb.model().rowCount()):
+            if not x in row_list:
+                self.lb.hideRow(x)    
        
     def update_filter(self):
         if self.filter_field.text() == "":
-            self.filter_table()
+            for x in range(self.lb.model().rowCount()):
+                self.lb.showRow(x)
 
 def stylesheet(self):
         return """
