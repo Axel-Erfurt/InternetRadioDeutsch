@@ -142,6 +142,8 @@ class Viewer(QMainWindow):
         if self.model.rowCount() < 1:
             return
         row = self.lb.selectionModel().selection().indexes()[0].row()
+        if row > self.model.rowCount() - 2:
+            return
         nextrow = row + 1
         itemList = self.model.takeRow(row)
         self.model.insertRow(nextrow,itemList)
@@ -152,6 +154,8 @@ class Viewer(QMainWindow):
         if self.model.rowCount() < 1:
             return
         row = self.lb.selectionModel().selection().indexes()[0].row()
+        if row < 1:
+            return
         nextrow = row - 1
         itemList = self.model.takeRow(row)
         self.model.insertRow(nextrow,itemList)
