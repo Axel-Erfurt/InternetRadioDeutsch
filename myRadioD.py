@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QSlider,
                              QVBoxLayout, QHBoxLayout, QComboBox, QLabel, QSpacerItem, QSizePolicy, 
                             QMessageBox, QPlainTextEdit, QSystemTrayIcon, QInputDialog, QToolButton, )
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtGui import QIcon, QPixmap, QStandardItem, QTextOption, QTextCursor
+from PyQt5.QtGui import QIcon, QPixmap, QTextOption, QTextCursor
 
 changed = pyqtSignal(QMimeData)
 btnwidth = 100
@@ -68,11 +68,14 @@ class MainWin(QMainWindow):
         
         self.radioNames = []
         self.radiolist = []
-        self.channels = []
+        self.exclchannels = []
         self.radioStations = ""
+        self.exclradioStations = ""
         self.rec_name = ""
         self.rec_url = ""
         self.old_meta = ""
+        self.current_station_name = ""
+        self.current_station_url = ""
         self.notificationsEnabled = True
         self.wg = QWidget()
         self.fr = RadioFinder()
@@ -84,8 +87,6 @@ class MainWin(QMainWindow):
         self.outfile = QStandardPaths.standardLocations(QStandardPaths.TempLocation)[0] + "/radio.mp3"
         self.recording_enabled = False
         self.is_recording = False
-        ### combo box
-        self.urlCombo = QComboBox()
 
         self.play_btn = QPushButton("Wiedergabe", self)
         self.play_btn.setFixedWidth(btnwidth)
@@ -145,7 +146,6 @@ class MainWin(QMainWindow):
         self.level_lbl = QLabel(self)
         self.level_lbl.setAlignment(Qt.AlignHCenter)
         self.level_lbl.setText("Lautstärke 65")
-        #self.layout.addWidget(self.urlCombo)
         self.layout.addLayout(self.layout1)
         self.layout.addItem(spc1)
         self.layout.addWidget(self.level_sld)
@@ -158,8 +158,6 @@ class MainWin(QMainWindow):
         self.pause_btn.clicked.connect(self.pause_preview)
         self.stop_btn.clicked.connect(self.stop_preview)
         self.level_sld.valueChanged.connect(self.set_sound_level)
-        self.urlCombo.currentIndexChanged.connect(self.url_changed)
-        self.current_station = ""
 
         self.process = QProcess()
         self.process.started.connect(self.getPID)
@@ -335,37 +333,37 @@ class MainWin(QMainWindow):
         self.tb_menu = QMenu()
         self.tb.setIconSize(QSize(20, 20))
         
-        ##### submenus from categories ##########
-        b = self.radioStations.splitlines()
-        for x in reversed(range(len(b))):
-            line = b[x]
-            if line == "":
-                print(f"empty line {x} removed")
-                del(b[x])
-               
-        i = 0
-        for x in range(0, len(b)):
-            line = b[x]
-            while True:
-                if line.startswith("--"):
-                    chm = self.tb_menu.addMenu(line.replace("-- ", "").replace(" --", ""))
-                    if "Exclusive" in line:
-                        chm.setIcon(self.er_icon)
-                    else:
-                        chm.setIcon(self.tIcon)
-                    break
-                    continue
-
-                elif not line.startswith("--"):
-                    chm.addAction(self.stationActs[i])
-                    i += 1
-                    break
+#        ##### submenus from categories ##########
+#        b = self.radioStations.splitlines()
+#        for x in reversed(range(len(b))):
+#            line = b[x]
+#            if line == "":
+#                print(f"leere Zeile {x} entfernt")
+#                del(b[x])
+#               
+#        i = 0
+#        for x in range(0, len(b)):
+#            line = b[x]
+#            while True:
+#                if line.startswith("--"):
+#                    chm = self.tb_menu.addMenu(line.replace("-- ", "").replace(" --", ""))
+#                    if "Exclusive" in line:
+#                        chm.setIcon(self.er_icon)
+#                    else:
+#                        chm.setIcon(self.tIcon)
+#                    break
+#                    continue
+#
+#                elif not line.startswith("--"):
+#                    chm.addAction(self.stationActs[i])
+#                    i += 1
+#                    break
         ####################################
         toolButton = QToolButton()
         toolButton.setIcon(self.tIcon)
         toolButton.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
-        toolButton.setText("   Stationen")
-        toolButton.setMenu(self.tb_menu)
+        toolButton.setText("   Menü")
+        toolButton.setMenu(self.tray_menu)
         toolButton.setPopupMode(QToolButton.InstantPopup)
         self.tb.addWidget(toolButton)
 
@@ -377,6 +375,10 @@ class MainWin(QMainWindow):
         self.tray_menu = QMenu()
         self.tray_menu.addAction(self.togglePlayerAction)
         self.tray_menu.setStyleSheet("font-size: 7pt;")
+        
+        self.exclradio_menu = self.tray_menu.addMenu("Exclusive Radio")
+        self.exclradio_menu.setIcon(self.er_icon)
+        
         ##### submenus from categories ##########
         b = self.radioStations.splitlines()
         for x in reversed(range(len(b))):
@@ -386,15 +388,14 @@ class MainWin(QMainWindow):
                 del(b[x])
                 
         i = 0
+        j = 0
         for x in range(0, len(b)):
             line = b[x]
             while True:
                 if line.startswith("--"):
                     chm = self.tray_menu.addMenu(line.replace("-- ", "").replace(" --", ""))
-                    if "Exclusive" in line:
-                        chm.setIcon(self.er_icon)
-                    else:
-                        chm.setIcon(self.tIcon)
+                    chm.setIcon(self.tIcon)
+                    j += 1
                     break
                     continue
 
@@ -406,12 +407,38 @@ class MainWin(QMainWindow):
                     chm.addAction(self.stationActs[i])
                     i += 1
                     break
+        #print(len(b) - j, "Test", i)            
+        ##### exclusive radio submenus from categories ##########
+        excl_list = self.exclradioStations.splitlines()
+        for x in reversed(range(len(excl_list))):
+            line = excl_list[x]
+            if line == "":
+                print("leere Zeile", x, "entfernt")
+                del(excl_list[x])
+                
+        for x in range(0, len(excl_list)):
+            line = excl_list[x]
+            while True:
+                if line.startswith("--"):
+                    exm = self.exclradio_menu.addMenu(line.replace("-- ", "").replace(" --", ""))
+                    exm.setIcon(self.er_icon)
+                    break
+                    continue
+
+                elif  not line.startswith("--"):
+                    ch = line.partition(",")[0]
+                    
+                    self.stationActs.append(QAction(QIcon(self.er_icon), ch, triggered = self.openTrayStation))
+                    self.stationActs[i].setData(str(i+2))
+                    exm.addAction(self.stationActs[i])
+                    i += 1
+                    break
         ####################################
         self.tray_menu.addSeparator()
         if not self.is_recording:
-            if not self.urlCombo.currentText().startswith("--"):
+            if not self.current_station_name.startswith("--"):
                 self.tray_menu.addAction(self.recordAction)
-                self.recordAction.setText("%s %s: %s" % ("starte Aufnahme von", "channel", self.urlCombo.currentText()))
+                self.recordAction.setText("%s %s: %s" % ("starte Aufnahme von", "channel", self.current_station_name))
         if self.is_recording:
             self.tray_menu.addAction(self.stopRecordAction)
         self.tray_menu.addSeparator()
@@ -439,12 +466,6 @@ class MainWin(QMainWindow):
         buttons = qApp.mouseButtons()
         if buttons == Qt.LeftButton:
             self.showMain()
-            #if self.isVisible() == False:
-            #    self.showWinAction.setText("Hauptfenster verbergen")
-            #    self.setVisible(True)
-            #elif self.isVisible() == True:
-            #    self.showWinAction.setText("Hauptfenster anzeigen")
-            #    self.setVisible(False)
                 
     def toggleNotif(self):
         if self.notifAction.text() == "Tray Meldungen ausschalten":
@@ -460,9 +481,13 @@ class MainWin(QMainWindow):
         action = self.sender()
         if action:
             ind = action.data()
-            name = action.text()     
-            self.urlCombo.setCurrentIndex(self.urlCombo.findText(name))
-            print("%s %s %s" % ("umschalten zu Station:", ind, self.urlCombo.currentText()))
+            name = action.text()
+            ch_number = int(ind)
+            self.current_station_name = name
+            self.current_station_url = self.radiolist[ch_number]
+            self.player.set_media(self.radiolist[ch_number])
+            self.player.play()  
+            print("umschalten zu Station:", ind, name, self.current_station_url)
 
     def exitApp(self):
         self.close()
@@ -486,8 +511,9 @@ class MainWin(QMainWindow):
         else:
             self.move(0, 26)
         if self.settings.contains("lastChannel"):
-            lch = self.settings.value("lastChannel")
-            self.urlCombo.setCurrentIndex(self.urlCombo.findText(lch))
+            self.current_station_name = self.settings.value("lastChannel")
+        if self.settings.contains("lastURL"):
+            self.current_station_url = self.settings.value("lastURL")
         if self.settings.contains("notifications"):
             self.notificationsEnabled = self.settings.value("notifications")
             if self.settings.value("notifications") == "false":
@@ -520,13 +546,14 @@ class MainWin(QMainWindow):
                 self.player.stop()
                 self.togglePlayerAction.setText("Wiedergabe starten")
             else:
+                self.player.setMedia(QMediaContent(QUrl(self.current_station_url)))
                 self.player.play()
                 self.togglePlayerAction.setText("Wiedergabe stoppen")
                 
     def writeSettings(self):
         self.settings.setValue("pos", self.pos())
-        self.settings.setValue("index", self.urlCombo.currentIndex())
-        self.settings.setValue("lastChannel", self.urlCombo.currentText())
+        self.settings.setValue("lastURL", self.current_station_url)
+        self.settings.setValue("lastChannel", self.current_station_name)
         self.settings.setValue("notifications", self.notificationsEnabled)
         if self.isVisible():
             self.settings.setValue("windowstate", "Hauptfenster anzeigen")
@@ -538,27 +565,25 @@ class MainWin(QMainWindow):
         self.settings.sync()
 
     def readStations(self):
-        menuSectionIcon = QIcon(os.path.join(os.path.dirname(sys.argv[0]), "radio_bg.png"))
-        self.urlCombo.clear()
         self.radiolist = []
-        self.channels = []
         dir = os.path.dirname(sys.argv[0])
         self.radiofile = os.path.join(dir, "myradio.txt")
-        print(self.radiofile)
         with open(self.radiofile, 'r') as f:
             self.radioStations = f.read()
             f.close()
-            for t in self.radioStations:
-                self.channels.append(t)
             for lines in self.radioStations.split("\n"):
                 if not lines.startswith("--"):
-                    self.urlCombo.addItem(QIcon.fromTheme("browser"), lines.partition(",")[0],Qt.UserRole - 1)
-                elif lines.startswith("--"):
-                    m = QStandardItem(menuSectionIcon,lines.partition(",")[0])
-                    m.setEnabled(False)
-                    self.urlCombo.model().appendRow(m)            
-                self.radiolist.append(lines.partition(",")[2])
-
+                    self.radiolist.append(lines.partition(",")[2])           
+                
+        # Exclusive Radio
+        self.exclradiofile = os.path.join(dir, "exclradio.txt")
+        with open(self.exclradiofile, 'r') as exclfile:
+            self.exclradioStations = exclfile.read()
+            exclfile.close()
+            for lines in self.exclradioStations.splitlines(): 
+                if not lines.startswith("--"):
+                    self.radiolist.append(lines.partition(",")[2])      
+                
     def edit_Channels_Table(self):
         print("edit_Channels_Table")
         dir = os.path.dirname(sys.argv[0])
@@ -608,10 +633,11 @@ class MainWin(QMainWindow):
 
     def createStatusBar(self):
         self.msglbl = QLabel()
+        #self.msglbl.setFixedHeight(60)
         self.msglbl.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.msglbl.setWordWrap(True)
-        self.msglbl.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.msglbl)
+        self.msglbl.setAlignment(Qt.AlignHCenter)
         self.msglbl.setText("Willkommen bei myRadio")
 
     def metaDataChanged(self):
@@ -620,7 +646,7 @@ class MainWin(QMainWindow):
             description = (self.player.metaData("Description"))
             comment = (self.player.metaData("Comment"))
             if trackInfo is None:
-                self.msglbl.setText("%s %s" % ("spiele", self.urlCombo.currentText()))
+                self.msglbl.setText(f"spiele {self.current_station_name}")
             new_trackInfo = ""
             new_trackInfo = str(trackInfo)
             if len(new_trackInfo) > 200:
@@ -630,7 +656,7 @@ class MainWin(QMainWindow):
                 self.msglbl.adjustSize()
                 self.adjustSize()
             else:
-                self.msglbl.setText("%s %s" % ("spiele", self.urlCombo.currentText()))
+                self.msglbl.setText(f"spiele {self.current_station_name}")
             mt = (f"Titel:{new_trackInfo}\nBeschreibung:{description}\nKommentar:: {comment}")
             if description == None:
                 mt = (f"Titel:{new_trackInfo}\nKommentar: {comment}")
@@ -649,76 +675,45 @@ class MainWin(QMainWindow):
                     self.trayIcon.setToolTip(mt)
                     self.old_meta = mt
         else:
-            self.msglbl.setText("%s %s" % ("spiele", self.urlCombo))
-
-    def url_changed(self):
-        self.player.stop()
-        if self.urlCombo.currentIndex() < self.urlCombo.count() - 1:
-            if not self.urlCombo.currentText().startswith("--"):
-                ind = self.urlCombo.currentIndex()
-                url = self.radiolist[ind]
-                
-                if url.endswith(".m3u") or url.endswith(".m3u8"):
-                    url = self.getURLfromM3U(url)
-                if url.endswith(".pls"):
-                    url = self.getURLfromPLS(url)
-                
-                self.current_station = url
-                self.player.stop()
-                self.rec_btn.setVisible(True)
-                self.stop_btn.setVisible(True)
-                self.play_btn.setVisible(True)
-                self.pause_btn.setVisible(True)
-                print("%s %s" %("spiele", url))
-                self.playRadioStation()
-                if self.togglePlayerAction.text() == "Wiedergabe stoppen":
-                    self.togglePlayerAction.setText("Wiedergabe starten")
-                    self.togglePlayerAction.setIcon(QIcon.fromTheme("media-playback-start"))
-                else:
-                    self.togglePlayerAction.setText("Wiedergabe stoppen")
-                    self.togglePlayerAction.setIcon(QIcon.fromTheme("media-playback-stop"))
-            else:
-                self.rec_btn.setVisible(False)
-                self.stop_btn.setVisible(False)
-                self.play_btn.setVisible(False)
-                self.pause_btn.setVisible(False)
+            self.msglbl.setText(f"spiele {self.current_station_name}")
  
     def playRadioStation(self):
         if self.player.is_on_pause:
             self.set_running_player()
+            self.player.setMedia(QMediaContent(QUrl(self.current_station_url)))
             self.player.start()
             self.pause_btn.setFocus()
             self.togglePlayerAction.setText("Wiedergabe stoppen")
             self.togglePlayerAction.setIcon(QIcon.fromTheme("media-playback-stop"))
  
-        if not self.current_station:
+        if not self.current_station_url:
             return
  
-        self.player.set_media(self.current_station)
+        self.player.setMedia(QMediaContent(QUrl(self.current_station_url)))
         self.set_running_player()
-        self.player.start()
+        self.player.play()
         if self.is_recording:
             self.recordAction.setText(f"stoppe Aufnahme von {self.rec_name}")
             self.recordAction.setIcon(QIcon.fromTheme("media-playback-stop"))
         else:
-            self.recordAction.setText("%s %s: %s" % ("starte Aufnahme", "von", self.urlCombo.currentText()))
+            self.recordAction.setText("%s %s: %s" % ("starte Aufnahme", "von", self.current_station_name))
             self.recordAction.setIcon(QIcon.fromTheme("media-record"))
-        self.msglbl.setText("%s %s" % ("spiele", self.urlCombo.currentText()))
-        self.setWindowTitle(self.urlCombo.currentText())   
+        self.msglbl.setText(f"spiele {self.current_station_name}")
+        self.setWindowTitle(self.current_station_name)   
 
     def playURL(self):
         clip = QApplication.clipboard()
         if not clip.text().endswith(".pls") and not clip.text().endswith(".m3u"):
-            self.current_station = clip.text()
+            self.current_station_url = clip.text()
         elif clip.text().endswith(".pls") :
             print("is a pls")
             url = self.getURLfromPLS(clip.text())
-            self.current_station = url
+            self.current_station_url = url
         elif clip.text().endswith(".m3u") or clip.text().endswith(".m3u8"):
             print("is a m3u")
             url = self.getURLfromM3U(clip.text())
-            self.current_station = url
-        print(self.current_station)
+            self.current_station_url = url
+        print(self.current_station_url)
 
         if self.player.is_on_pause:
             self.set_running_player()
@@ -726,13 +721,13 @@ class MainWin(QMainWindow):
             self.pause_btn.setFocus()
             return
  
-        if not self.current_station:
+        if not self.current_station_url:
             return
  
-        self.player.set_media(self.current_station)
+        self.player.set_media(self.current_station_url)
         self.set_running_player()
         self.player.start()
-        self.msglbl.setText("%s %s" % ("spiele", self.urlCombo.currentText()))
+        self.msglbl.setText(f"spiele {self.current_station_name}")
         self.metaDataChanged()
  
     def set_running_player(self):
@@ -775,8 +770,8 @@ class MainWin(QMainWindow):
     def recordRadio1(self):
         if not self.is_recording:
             self.deleteOutFile()
-            self.rec_url = self.current_station
-            self.rec_name = self.urlCombo.currentText()
+            self.rec_url = self.current_station_url
+            self.rec_name = self.current_station_name
             cmd = ("wget -q "  + self.rec_url + " -O " + self.outfile)
             print(cmd)         
             self.is_recording = True   
@@ -797,7 +792,7 @@ class MainWin(QMainWindow):
             self.saveMovie()
             self.stoprec_btn.setVisible(False)
             self.rec_btn.setVisible(True)
-            self.recordAction.setText("%s %s: %s" % ("starte Aufnahme", "von", self.urlCombo.currentText()))
+            self.recordAction.setText("%s %s: %s" % ("starte Aufnahme", "von", self.current_station_name))
             self.recordAction.setIcon(QIcon.fromTheme("media-record"))
         else:
             self.showTrayMessage("Note", "keine Aufnahme gastartet", self.tIcon)
@@ -1452,4 +1447,3 @@ if __name__ == "__main__":
     win = MainWin()
     app.setQuitOnLastWindowClosed(False)
     sys.exit(app.exec_())
-    
