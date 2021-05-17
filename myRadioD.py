@@ -94,12 +94,6 @@ class MainWin(QMainWindow):
         self.play_btn.setIcon(QIcon.fromTheme("media-playback-start"))
         self.layout1.addWidget(self.play_btn)
 
-        self.pause_btn = QPushButton("Pause", self)
-        self.pause_btn.setFixedWidth(btnwidth)
-        self.pause_btn.setFlat(True)
-        self.pause_btn.setIcon(QIcon.fromTheme("media-playback-pause"))
-        self.layout1.addWidget(self.pause_btn)
-
         self.stop_btn = QPushButton("Stop", self)
         self.stop_btn.setFixedWidth(btnwidth)
         self.stop_btn.setFlat(True)
@@ -111,7 +105,7 @@ class MainWin(QMainWindow):
         self.rec_btn.setFlat(True)
         self.rec_btn.setIcon(QIcon.fromTheme("media-record"))
         self.rec_btn.clicked.connect(self.recordRadio1)
-        self.rec_btn.setToolTip("Record Station")
+        self.rec_btn.setToolTip("Aufnahme starten")
         self.layout1.addWidget(self.rec_btn)
         ### stop record
         self.stoprec_btn = QPushButton("Aufnahme stoppen", self)
@@ -125,9 +119,9 @@ class MainWin(QMainWindow):
         self.edit_btn = QPushButton("", self)
         self.edit_btn.setFixedWidth(26)
         self.edit_btn.setFlat(True)
-        self.edit_btn.setToolTip("Sender Editor")
+        self.edit_btn.setToolTip("Sendereditor")
         self.edit_btn.setIcon(QIcon.fromTheme("preferences-system"))
-        self.edit_btn.clicked.connect(self.edit_Channels_Text)
+        self.edit_btn.clicked.connect(self.edit_Channels_Table)
         self.layout1.addWidget(self.edit_btn)
         ### hide Main Window
         self.hide_btn = QPushButton("", self)
@@ -155,7 +149,6 @@ class MainWin(QMainWindow):
         self.player.metaDataChanged.connect(self.metaDataChanged)
         self.player.error.connect(self.handleError)
         self.play_btn.clicked.connect(self.togglePlay)
-        self.pause_btn.clicked.connect(self.pause_preview)
         self.stop_btn.clicked.connect(self.stop_preview)
         self.level_sld.valueChanged.connect(self.set_sound_level)
 
@@ -332,32 +325,6 @@ class MainWin(QMainWindow):
         self.tb = self.addToolBar("Menu")
         self.tb_menu = QMenu()
         self.tb.setIconSize(QSize(20, 20))
-        
-#        ##### submenus from categories ##########
-#        b = self.radioStations.splitlines()
-#        for x in reversed(range(len(b))):
-#            line = b[x]
-#            if line == "":
-#                print(f"leere Zeile {x} entfernt")
-#                del(b[x])
-#               
-#        i = 0
-#        for x in range(0, len(b)):
-#            line = b[x]
-#            while True:
-#                if line.startswith("--"):
-#                    chm = self.tb_menu.addMenu(line.replace("-- ", "").replace(" --", ""))
-#                    if "Exclusive" in line:
-#                        chm.setIcon(self.er_icon)
-#                    else:
-#                        chm.setIcon(self.tIcon)
-#                    break
-#                    continue
-#
-#                elif not line.startswith("--"):
-#                    chm.addAction(self.stationActs[i])
-#                    i += 1
-#                    break
         ####################################
         toolButton = QToolButton()
         toolButton.setIcon(self.tIcon)
@@ -407,7 +374,6 @@ class MainWin(QMainWindow):
                     chm.addAction(self.stationActs[i])
                     i += 1
                     break
-        #print(len(b) - j, "Test", i)            
         ##### exclusive radio submenus from categories ##########
         excl_list = self.exclradioStations.splitlines()
         for x in reversed(range(len(excl_list))):
@@ -438,7 +404,7 @@ class MainWin(QMainWindow):
         if not self.is_recording:
             if not self.current_station_name.startswith("--"):
                 self.tray_menu.addAction(self.recordAction)
-                self.recordAction.setText("%s %s: %s" % ("starte Aufnahme von", "channel", self.current_station_name))
+                self.recordAction.setText(f"starte Aufnahme von {self.current_station_name}")
         if self.is_recording:
             self.tray_menu.addAction(self.stopRecordAction)
         self.tray_menu.addSeparator()
@@ -486,7 +452,8 @@ class MainWin(QMainWindow):
             self.current_station_name = name
             self.current_station_url = self.radiolist[ch_number]
             self.player.set_media(self.radiolist[ch_number])
-            self.player.play()  
+            self.player.play()
+            self.set_running_player()
             print("umschalten zu Station:", ind, name, self.current_station_url)
 
     def exitApp(self):
@@ -548,6 +515,7 @@ class MainWin(QMainWindow):
             else:
                 self.player.setMedia(QMediaContent(QUrl(self.current_station_url)))
                 self.player.play()
+                self.set_running_player()
                 self.togglePlayerAction.setText("Wiedergabe stoppen")
                 
     def writeSettings(self):
@@ -678,13 +646,12 @@ class MainWin(QMainWindow):
             self.msglbl.setText(f"spiele {self.current_station_name}")
  
     def playRadioStation(self):
-        if self.player.is_on_pause:
-            self.set_running_player()
+        if self.player.state() == 0:
             self.player.setMedia(QMediaContent(QUrl(self.current_station_url)))
-            self.player.start()
-            self.pause_btn.setFocus()
+            self.player.play()
             self.togglePlayerAction.setText("Wiedergabe stoppen")
             self.togglePlayerAction.setIcon(QIcon.fromTheme("media-playback-stop"))
+            self.set_running_player()
  
         if not self.current_station_url:
             return
@@ -696,7 +663,7 @@ class MainWin(QMainWindow):
             self.recordAction.setText(f"stoppe Aufnahme von {self.rec_name}")
             self.recordAction.setIcon(QIcon.fromTheme("media-playback-stop"))
         else:
-            self.recordAction.setText("%s %s: %s" % ("starte Aufnahme", "von", self.current_station_name))
+            self.recordAction.setText(f"starte Aufnahme von {self.current_station_name}")
             self.recordAction.setIcon(QIcon.fromTheme("media-record"))
         self.msglbl.setText(f"spiele {self.current_station_name}")
         self.setWindowTitle(self.current_station_name)   
@@ -715,10 +682,9 @@ class MainWin(QMainWindow):
             self.current_station_url = url
         print(self.current_station_url)
 
-        if self.player.is_on_pause:
+        if self.player.state() == 0:
             self.set_running_player()
             self.player.start()
-            self.pause_btn.setFocus()
             return
  
         if not self.current_station_url:
@@ -732,22 +698,12 @@ class MainWin(QMainWindow):
  
     def set_running_player(self):
         self.play_btn.setEnabled(False)
-        self.pause_btn.setEnabled(True)
         self.stop_btn.setEnabled(True)
         self.rec_btn.setEnabled(True)
  
-    def pause_preview(self):
-        self.player.set_on_pause()
-        self.play_btn.setEnabled(True)
-        self.pause_btn.setEnabled(False)
-        self.rec_btn.setEnabled(False)
-        self.play_btn.setFocus(True)
-        self.msglbl.setText("Pause")
- 
     def stop_preview(self):
-        self.player.finish()
+        self.player.stop()
         self.play_btn.setEnabled(True)
-        self.pause_btn.setEnabled(False)
         self.stop_btn.setEnabled(False)
         self.rec_btn.setEnabled(False)
         self.msglbl.setText("gestoppt")
@@ -792,10 +748,10 @@ class MainWin(QMainWindow):
             self.saveMovie()
             self.stoprec_btn.setVisible(False)
             self.rec_btn.setVisible(True)
-            self.recordAction.setText("%s %s: %s" % ("starte Aufnahme", "von", self.current_station_name))
+            self.recordAction.setText(f"starte Aufnahme von {self.current_station_name}")
             self.recordAction.setIcon(QIcon.fromTheme("media-record"))
         else:
-            self.showTrayMessage("Note", "keine Aufnahme gastartet", self.tIcon)
+            self.showTrayMessage("Note", "keine Aufnahme gestartet", self.tIcon)
 
     def saveMovie(self):
         if not self.is_recording:
@@ -833,7 +789,6 @@ class RadioPlayer(QMediaPlayer):
         self.url = None
         self.auto_sound_level = True
         self.is_running = False
-        self.is_on_pause = False
         self.volumeChanged.connect(self.on_volume_changed)
         self.stateChanged.connect(self.on_state_changed)
  
@@ -845,22 +800,6 @@ class RadioPlayer(QMediaPlayer):
             self.url = QUrl(media)
  
         self.setMedia(QMediaContent(self.url))
- 
-    def start(self):
-        self.is_running = True
-        self.is_on_pause = False
-        self.play()
- 
-    def set_on_pause(self):
-        self.is_running = False
-        self.is_on_pause = True
-        self.pause()
-
- 
-    def finish(self):
-        self.is_running = False
-        self.is_on_pause = False
-        self.stop()
             
     def set_sound_level(self, level):
         self.auto_sound_level = False
