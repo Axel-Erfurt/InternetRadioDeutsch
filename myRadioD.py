@@ -68,8 +68,11 @@ class MainWin(QMainWindow):
         
         self.radioNames = []
         self.radiolist = []
+        self.exclradiolist = []
         self.channels = []
+        self.exclchannels = []
         self.radioStations = ""
+        self.exclradioStations = ""
         self.rec_name = ""
         self.rec_url = ""
         self.old_meta = ""
@@ -377,6 +380,10 @@ class MainWin(QMainWindow):
         self.tray_menu = QMenu()
         self.tray_menu.addAction(self.togglePlayerAction)
         self.tray_menu.setStyleSheet("font-size: 7pt;")
+        
+        self.exclradio_menu = self.tray_menu.addMenu("Exclusive Radio")
+        self.exclradio_menu.setIcon(self.er_icon)
+        
         ##### submenus from categories ##########
         b = self.radioStations.splitlines()
         for x in reversed(range(len(b))):
@@ -404,6 +411,32 @@ class MainWin(QMainWindow):
                     self.stationActs.append(QAction(QIcon.fromTheme("browser"), ch, triggered = self.openTrayStation))
                     self.stationActs[i].setData(str(i))
                     chm.addAction(self.stationActs[i])
+                    i += 1
+                    break
+                    
+        ##### exclusive radio submenus from categories ##########
+        excl_list = self.exclradioStations.splitlines()
+        for x in reversed(range(len(excl_list))):
+            line = excl_list[x]
+            if line == "":
+                print("leere Zeile", x, "entfernt")
+                del(excl_list[x])
+                
+        for x in range(0, len(excl_list)):
+            line = excl_list[x]
+            while True:
+                if line.startswith("--"):
+                    exm = self.exclradio_menu.addMenu(line.replace("-- ", "").replace(" --", ""))
+                    exm.setIcon(self.er_icon)
+                    break
+                    continue
+
+                elif  not line.startswith("--"):
+                    ch = line.partition(",")[0]
+                    
+                    self.stationActs.append(QAction(QIcon.fromTheme("browser"), ch, triggered = self.openTrayStation))
+                    self.stationActs[i].setData(str(i))
+                    exm.addAction(self.stationActs[i])
                     i += 1
                     break
         ####################################
@@ -544,7 +577,7 @@ class MainWin(QMainWindow):
         self.channels = []
         dir = os.path.dirname(sys.argv[0])
         self.radiofile = os.path.join(dir, "myradio.txt")
-        print(self.radiofile)
+        #print(self.radiofile)
         with open(self.radiofile, 'r') as f:
             self.radioStations = f.read()
             f.close()
@@ -558,7 +591,16 @@ class MainWin(QMainWindow):
                     m.setEnabled(False)
                     self.urlCombo.model().appendRow(m)            
                 self.radiolist.append(lines.partition(",")[2])
-
+        # Exclusive Radio
+        self.exclradiofile = os.path.join(dir, "exclradio.txt")
+        with open(self.exclradiofile, 'r') as f:
+            self.exclradioStations = f.read()
+            f.close()
+            for t in self.exclradioStations:
+                self.exclchannels.append(t)
+            for lines in self.exclradioStations.split("\n"):          
+                self.exclradiolist.append(lines.partition(",")[2])
+                
     def edit_Channels_Table(self):
         print("edit_Channels_Table")
         dir = os.path.dirname(sys.argv[0])
