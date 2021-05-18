@@ -134,6 +134,10 @@ WKPW 90.7 "Classic Hits" Knightstown  IN,http://165.139.147.234:8081/wkpw
 WDBG Big 103.1 Classic Hits & True Oldies,http://ice10.securenetsystems.net/WDBG
 WCSY "SuperHits 103.7 COSY-FM" South Haven  MI,http://crystalout.surfernetwork.com:8001/WCSY-FM_MP3
 -- Rock --
+Virgin Radio Rock Party,http://icy.unitedradio.it/VirginRockParty.mp3
 WNRQ "105.9 The Rock" Nashville  TN,http://c6icy.prod.playlists.ihrhls.com/2780_icy
 WXTB 97.9 "98 Rock" Clearwater  FL,http://c4icyelb.prod.playlists.ihrhls.com/697_icy
+-- Classic --
+Your Classical - Peaceful Piano,http://peacefulpiano.stream.publicradio.org/peacefulpiano.mp3
+
 

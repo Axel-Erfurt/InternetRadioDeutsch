@@ -300,6 +300,7 @@ class Viewer(QMainWindow):
 
             tlist = self.ordered_set(out_list)
             m3u_content = '\n'.join(tlist)
+            m3u_content += '\n'
 
             with open(fileName, 'w') as f:        
                 f.write(m3u_content)

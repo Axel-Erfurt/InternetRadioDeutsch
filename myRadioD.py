@@ -43,8 +43,10 @@ class Editor(QWidget):
                     print("Editor geschlossen")
             
     def saveFile(self):
+        t = os.linesep.join([s for s in self.radio_editor.toPlainText().splitlines() if s])
+        t += '\n'
         with open(self.radiofile, 'w', encoding='utf8') as f:
-            f.write(str(self.radio_editor.toPlainText()))
+            f.write(t)
             f.close()
             return True
             
@@ -345,24 +347,18 @@ class MainWin(QMainWindow):
         
         self.exclradio_menu = self.tray_menu.addMenu("Exclusive Radio")
         self.exclradio_menu.setIcon(self.er_icon)
-        
-        ##### submenus from categories ##########
-        b = self.radioStations.splitlines()
-        for x in reversed(range(len(b))):
-            line = b[x]
-            if line == "":
-                print("leere Zeile", x, "entfernt")
-                del(b[x])
-                
         i = 0
-        j = 0
-        for x in range(0, len(b)):
+        ##### submenus from categories ##########
+        t = os.linesep.join([s for s in self.radioStations.splitlines() if s])
+        t += '\n'
+        b = t.splitlines()          
+
+        for x in range(len(b)):
             line = b[x]
             while True:
                 if line.startswith("--"):
                     chm = self.tray_menu.addMenu(line.replace("-- ", "").replace(" --", ""))
                     chm.setIcon(self.tIcon)
-                    j += 1
                     break
                     continue
 
@@ -374,15 +370,13 @@ class MainWin(QMainWindow):
                     chm.addAction(self.stationActs[i])
                     i += 1
                     break
+                    
         ##### exclusive radio submenus from categories ##########
-        excl_list = self.exclradioStations.splitlines()
-        for x in reversed(range(len(excl_list))):
-            line = excl_list[x]
-            if line == "":
-                print("leere Zeile", x, "entfernt")
-                del(excl_list[x])
+        t = os.linesep.join([s for s in self.exclradioStations.splitlines() if s])
+        t += '\n'
+        excl_list = t.splitlines()
                 
-        for x in range(0, len(excl_list)):
+        for x in range(len(excl_list)):
             line = excl_list[x]
             while True:
                 if line.startswith("--"):
@@ -395,7 +389,7 @@ class MainWin(QMainWindow):
                     ch = line.partition(",")[0]
                     
                     self.stationActs.append(QAction(QIcon(self.er_icon), ch, triggered = self.openTrayStation))
-                    self.stationActs[i].setData(str(i+2))
+                    self.stationActs[i].setData(str(i))
                     exm.addAction(self.stationActs[i])
                     i += 1
                     break
@@ -451,10 +445,11 @@ class MainWin(QMainWindow):
             ch_number = int(ind)
             self.current_station_name = name
             self.current_station_url = self.radiolist[ch_number]
+            print("umschalten zu Station:", ind, name, self.current_station_url)
             self.player.set_media(self.radiolist[ch_number])
             self.player.play()
             self.set_running_player()
-            print("umschalten zu Station:", ind, name, self.current_station_url)
+            self.setWindowTitle(name)
 
     def exitApp(self):
         self.close()
@@ -510,11 +505,13 @@ class MainWin(QMainWindow):
                 print("Player stummgeschaltet")
         if self.settings.contains("playerstate"):
             if self.settings.value("playerstate") == "0":
+                self.player.setMedia(QMediaContent(QUrl(self.current_station_url)))
                 self.player.stop()
                 self.togglePlayerAction.setText("Wiedergabe starten")
             else:
                 self.player.setMedia(QMediaContent(QUrl(self.current_station_url)))
                 self.player.play()
+                self.setWindowTitle(self.current_station_name)
                 self.set_running_player()
                 self.togglePlayerAction.setText("Wiedergabe stoppen")
                 
@@ -539,7 +536,8 @@ class MainWin(QMainWindow):
         with open(self.radiofile, 'r') as f:
             self.radioStations = f.read()
             f.close()
-            for lines in self.radioStations.split("\n"):
+            t = os.linesep.join([s for s in self.radioStations.splitlines() if s])
+            for lines in t.splitlines():
                 if not lines.startswith("--"):
                     self.radiolist.append(lines.partition(",")[2])           
                 
@@ -548,7 +546,8 @@ class MainWin(QMainWindow):
         with open(self.exclradiofile, 'r') as exclfile:
             self.exclradioStations = exclfile.read()
             exclfile.close()
-            for lines in self.exclradioStations.splitlines(): 
+            t = os.linesep.join([s for s in self.exclradioStations.splitlines() if s])
+            for lines in t.splitlines():
                 if not lines.startswith("--"):
                     self.radiolist.append(lines.partition(",")[2])      
                 
