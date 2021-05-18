@@ -23,6 +23,7 @@ class Viewer(QMainWindow):
       self.lb.horizontalHeader().hide()
       self.model = QStandardItemModel()
       self.lb.setModel(self.model)
+      self.model.itemChanged.connect(self.finishedEdit)
       self.lb.setEditTriggers(QAbstractItemView.DoubleClicked)
       self.lb.setSelectionBehavior(self.lb.SelectRows)
       self.lb.setSelectionMode(self.lb.SingleSelection)
@@ -41,6 +42,9 @@ class Viewer(QMainWindow):
       print("Hello")
       self.open_channels(self.mychannels_file)
       self.lb.setFocus()
+      
+    def finishedEdit(self):
+        self.isChanged = True
       
     def setChanged(self):
         self.isChanged = True
@@ -108,19 +112,19 @@ class Viewer(QMainWindow):
         tb.addSeparator()
         
         add_btn = QToolButton()
-        add_btn.setIcon(QIcon.fromTheme("list-add"))
+        add_btn.setIcon(QIcon.fromTheme("add"))
         add_btn.setToolTip("Zeile hinzufügen")
         add_btn.clicked.connect(self.add_row)
         tb.addWidget(add_btn)
 
         move_down_btn = QToolButton()
-        move_down_btn.setIcon(QIcon.fromTheme("go-down"))
+        move_down_btn.setIcon(QIcon.fromTheme("down"))
         move_down_btn.setToolTip("nach unten bewegen")
         move_down_btn.clicked.connect(self.move_down)
         tb.addWidget(move_down_btn)
         
         move_up_up = QToolButton()
-        move_up_up.setIcon(QIcon.fromTheme("go-up"))
+        move_up_up.setIcon(QIcon.fromTheme("up"))
         move_up_up.setToolTip("nach oben bewegen")
         move_up_up.clicked.connect(self.move_up)
         tb.addWidget(move_up_up)
