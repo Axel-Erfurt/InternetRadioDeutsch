@@ -130,7 +130,7 @@ class MainWin(QMainWindow):
         self.hide_btn.setFixedWidth(26)
         self.hide_btn.setFlat(True)
         self.hide_btn.setToolTip("Fenster verbergen")
-        self.hide_btn.setIcon(QIcon.fromTheme("window-hide"))
+        self.hide_btn.setIcon(QIcon.fromTheme("view-restore"))
         self.hide_btn.clicked.connect(self.showMain)
         self.layout1.addWidget(self.hide_btn)        
 
@@ -343,10 +343,10 @@ class MainWin(QMainWindow):
     def makeTrayMenu(self):
         self.tray_menu = QMenu()
         self.tray_menu.addAction(self.togglePlayerAction)
-        self.tray_menu.setStyleSheet("font-size: 7pt;")
+        self.tray_menu.setStyleSheet("font-size: 8pt;")
         
-        self.exclradio_menu = self.tray_menu.addMenu("Exclusive Radio")
-        self.exclradio_menu.setIcon(self.er_icon)
+        self.myradio_menu = self.tray_menu.addMenu("myRadio")
+        self.myradio_menu.setIcon(self.tIcon)
         i = 0
         ##### submenus from categories ##########
         t = os.linesep.join([s for s in self.radioStations.splitlines() if s])
@@ -357,7 +357,7 @@ class MainWin(QMainWindow):
             line = b[x]
             while True:
                 if line.startswith("--"):
-                    chm = self.tray_menu.addMenu(line.replace("-- ", "").replace(" --", ""))
+                    chm = self.myradio_menu.addMenu(line.replace("-- ", "").replace(" --", ""))
                     chm.setIcon(self.tIcon)
                     break
                     continue
@@ -365,13 +365,15 @@ class MainWin(QMainWindow):
                 elif  not line.startswith("--"):
                     ch = line.partition(",")[0]
                     
-                    self.stationActs.append(QAction(QIcon.fromTheme("browser"), ch, triggered = self.openTrayStation))
+                    self.stationActs.append(QAction(QIcon(self.tIcon), ch, triggered = self.openTrayStation))
                     self.stationActs[i].setData(str(i))
                     chm.addAction(self.stationActs[i])
                     i += 1
                     break
                     
         ##### exclusive radio submenus from categories ##########
+        self.exclradio_menu = self.tray_menu.addMenu("Exclusive Radio")
+        self.exclradio_menu.setIcon(self.er_icon)
         t = os.linesep.join([s for s in self.exclradioStations.splitlines() if s])
         t += '\n'
         excl_list = t.splitlines()
