@@ -12,15 +12,21 @@ Anleitung -> [myRadio UbuntuUsers Wiki 🇩🇪](https://wiki.ubuntuusers.de/How
 
 ### Installation Mint / Ubuntu
 
-`wget 'https://raw.githubusercontent.com/Axel-Erfurt/InternetRadioDeutsch/master/InternetRadioDeutschInstallation.sh' -O ~/Downloads/InternetRadioDeutschInstallation.sh && chmod +x ~/Downloads/InternetRadioDeutschInstallation.sh && ~/Downloads/InternetRadioDeutschInstallation.sh `
+```
+wget 'https://raw.githubusercontent.com/Axel-Erfurt/InternetRadioDeutsch/master/InternetRadioDeutschInstallation.sh' -O ~/Downloads/InternetRadioDeutschInstallation.sh && chmod +x ~/Downloads/InternetRadioDeutschInstallation.sh && ~/Downloads/InternetRadioDeutschInstallation.sh 
+```
 
 ### Deinstallation Mint / Ubuntu
 
-`rm -rf ~/.local/share/applications/InternetRadioDeutsch.desktop && rm -rf ~/.local/share/InternetRadioDeutsch`
+```
+rm -rf ~/.local/share/applications/InternetRadioDeutsch.desktop && rm -rf ~/.local/share/InternetRadioDeutsch
+```
 
 ### Editor
 
-```python3 ~/.local/share/InternetRadioDeutsch/myRadioEditorDE.py```
+```
+python3 ~/.local/share/InternetRadioDeutsch/myRadioEditorDE.py
+```
 
 - Spalte 1 -> Name
 - Spalte 2 -> Gruppe
